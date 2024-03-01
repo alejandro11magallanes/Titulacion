@@ -3,28 +3,46 @@ import {
   AppBar,
   Box,
   Button,
-  Container,
   CssBaseline,
   Toolbar,
   Typography,
-  useTheme,
 } from "@mui/material";
+import axios from "axios";
 import companylogo from "../../images/company.png";
 import { useNavigate } from "react-router-dom";
 import Diversity1Icon from "@mui/icons-material/Diversity1";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
+import apiUrl from "../../apiConfig";
 
 function MyScreen() {
-  const theme = useTheme();
   const navigate = useNavigate();
   const nombre = localStorage.getItem("nombre");
   const nombreSucursal = localStorage.getItem("sucursalNombre");
+  const UrlTLogout = `${apiUrl}/logout`;
+
+  const CerrarSesion = async () =>{
+    const token = localStorage.getItem("token"); 
+     
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      },
+    };
+    await axios.post(UrlTLogout,{}, config).then((response) => {
+      localStorage.clear();
+    });
+  }
 
   const RedirectToClienteEmpleado = () => {
     navigate("/clienteEmpleado");
   };
   const RedirectToVisitasEmpleado = () => {
     navigate("/visitasEmpleado");
+  };
+  const Logout = () => {
+    CerrarSesion()
+    navigate("/");
+    
   };
 
   return (
@@ -38,7 +56,7 @@ function MyScreen() {
             justifyContent: "space-between",
           }}
         >
-          <img src={companylogo} style={{ height: "40px" }} />
+          <img src={companylogo} style={{ height: "40px" }} alt="logo" />
           <Typography variant="body1" style={{ textAlign: "right" }}>
             Hola! {nombre}
           </Typography>
@@ -88,6 +106,7 @@ function MyScreen() {
           <br />
           <Button
             variant="contained"
+            onClick={()=> Logout()}
             sx={{ backgroundColor: "#00ff00", width: "100%", height: "70px" }}
           >
             Salir

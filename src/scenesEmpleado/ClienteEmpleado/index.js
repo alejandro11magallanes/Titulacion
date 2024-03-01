@@ -3,11 +3,9 @@ import {
   AppBar,
   Box,
   Button,
-  Container,
   CssBaseline,
   Toolbar,
   Typography,
-  useTheme,
   TextField,
   Select,
   InputLabel,
@@ -17,12 +15,12 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import apiUrl from "../../apiConfig";
 import companylogo from "../../images/company.png";
 import Diversity1Icon from "@mui/icons-material/Diversity1";
-const UrlTipoCliente = "http://localhost:5656/selectXempct";
-const UrlCampana = "http://localhost:5656/selectXempcam";
-const baseUrlPost = "http://localhost:5656/agregarCliente";
+const UrlTipoCliente = `${apiUrl}/selectXempct`;
+const UrlCampana = `${apiUrl}/selectXempcam`;
+const baseUrlPost = `${apiUrl}/agregarCliente`;
 
 const ClienteEmpleado = () => {
   const nombre = localStorage.getItem("nombre");
@@ -32,7 +30,7 @@ const ClienteEmpleado = () => {
   const [dataTipoClientes, setDataTipoClientes]= useState([]);
   const [dataCampana, setDataCampana]= useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedEmpresa, setSelectedEmpr] = useState({
+  const [selectedEmpresa] = useState({
     empresa: empresaSelected,
   });
   const id = localStorage.getItem("id");
@@ -83,6 +81,43 @@ const handleChange=e=>{
     });
   }
 
+  const validarTelefono = (telefono) => {
+    // Verificar que el teléfono tenga 10 dígitos
+    return /^\d{10}$/.test(telefono);
+  };
+
+  const validarNombre = (nombre) => {
+    // Verificar que el nombre tenga al menos 8 caracteres
+    return nombre.length >= 8;
+  };
+
+  const validarCorreo = (correo) => {
+    // Verificar formato de correo electrónico
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+  };
+
+  const validarFormulario = () => {
+    const { cli_cel, cli_nomcom, cli_correo, tip_clave, cam_clave } = nuevoCliente;
+    if (!validarTelefono(cli_cel)) {
+      alert("El teléfono debe tener 10 dígitos.");
+      return false;
+    }
+    if (!validarNombre(cli_nomcom)) {
+      alert("El nombre debe tener al menos 8 caracteres.");
+      return false;
+    }
+    if (!validarCorreo(cli_correo)) {
+      alert("El correo electrónico no es válido.");
+      return false;
+    }
+    if (!tip_clave || !cam_clave) {
+      alert("Por favor selecciona una opción en ambos campos.");
+      return false;
+    }
+    return true;
+  };
+
+
   const GuardarCliente = async ()=>{
     const token = localStorage.getItem("token"); 
      
@@ -91,14 +126,15 @@ const handleChange=e=>{
         Authorization: `Bearer ${token}`, 
       },
     };
-    try{
-    await axios.post(baseUrlPost,nuevoCliente, config).then((response) => {
-        setOpenDialog(true);
-    });
-}
-catch(error){
-    console.error('Error al guardar el cliente:', error);
-}
+    if (validarFormulario()) {
+      try {
+        await axios.post(baseUrlPost, nuevoCliente, config).then((response) => {
+          setOpenDialog(true);
+        });
+      } catch (error) {
+        console.error("Error al guardar el cliente:", error);
+      }
+    }
   }
 
   useEffect(() => {
@@ -110,13 +146,16 @@ catch(error){
     };
 
     fetchData();
-  }, []);
+  });
 
   const handleCloseDialog = () => {
     setOpenDialog(false); // Cierra el diálogo
     navigate("/inicioEmpleado");
   };
 
+  const Incio = () =>{
+    navigate("/inicioEmpleado");
+  };
 
   return (
     <>
@@ -130,7 +169,7 @@ catch(error){
               justifyContent: "space-between",
             }}
           >
-            <img src={companylogo} style={{ height: "40px" }} />
+            <img src={companylogo} style={{ height: "40px" }} alt="logo" />
             <Typography variant="body1" style={{ textAlign: "right" }}>
               Hola! {nombre}
             </Typography>
@@ -197,7 +236,7 @@ catch(error){
               margin="normal"
               label="Tipo de Cliente"
               onChange={handleChange}
-              sx={{ backgroundColor: "#fff", marginTop: "15px" }}
+              sx={{ backgroundColor: "#fff", marginTop: "15px",textAlign: "left" }}
               fullWidth
             >
                 {dataTipoClientes.map((tipo) => (
@@ -218,7 +257,7 @@ catch(error){
               margin="normal"
               label="Campaña"
               onChange={handleChange}
-              sx={{ backgroundColor: "#fff", marginTop: "25px" }}
+              sx={{ backgroundColor: "#fff", marginTop: "25px",textAlign: "left" }}
               fullWidth
             >
                  {dataCampana.map((campana) => (
@@ -241,6 +280,7 @@ catch(error){
           </Button>
           <Button
             variant="contained"
+            onClick={()=> Incio()}
             sx={{ backgroundColor: "#00ff00", width: "40%" }}
           >
             Cancelar

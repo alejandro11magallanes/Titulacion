@@ -21,14 +21,13 @@ import {
   import EditIcon from "@mui/icons-material/Edit";
   import DeleteIcon from "@mui/icons-material/Delete";
   import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-
+  import apiUrl from "../../apiConfig";
   //url de las apis
-const baseUrl = "http://localhost:5656/verSucursal";
-const baseUrlPost = "http://localhost:5656/agregarSucursal";
-const baseUrlPut = "http://localhost:5656/editarSucursal/";
-const baseUrlDelete = "http://localhost:5656/eliminarSucursal/";
-const baseUrlEmpresasSelect = "http://localhost:5656/selectEmpresa";
-const baseUrlBuscarEmpresa = "http://localhost:5656/EmpSuc";
+const baseUrlPost = `${apiUrl}/agregarSucursal`;
+const baseUrlPut = `${apiUrl}/editarSucursal/`;
+const baseUrlDelete = `${apiUrl}/eliminarSucursal/`;
+const baseUrlEmpresasSelect = `${apiUrl}/selectEmpresa`;
+const baseUrlBuscarEmpresa = `${apiUrl}/EmpSuc`;
 
 const Sucursales = () =>{
 
@@ -291,14 +290,14 @@ const bodyInsertar = (
 return(
     <>
     <SidebarCostum/>
-    <Box m="20px">
+    <Box m="20px" sx={{width: "100%"}}>
       <Box sx={{ display: "flex" }}>
         <Typography variant="h3">Sucursales</Typography>
         <Button onClick={() =>abrirCerrarModalInsertar()}>
           <AddCircleOutlineIcon fontSize="large" />
         </Button>
       </Box>
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", width: "40%" }}>
       <FormControl fullWidth>
         <InputLabel id="demo-simple-select">Empresa</InputLabel>
         <Select

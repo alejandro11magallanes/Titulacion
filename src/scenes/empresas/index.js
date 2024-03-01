@@ -17,11 +17,12 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import apiUrl from "../../apiConfig";
 //url de las apis
-const baseUrl = "http://localhost:5656/verEmpresa";
-const baseUrlPost = "http://localhost:5656/agregarEmpresa";
-const baseUrlPut = "http://localhost:5656/editarEmpresa/";
-const baseUrlDelete = "http://localhost:5656/eliminarEmpresa/";
+const baseUrl = `${apiUrl}/verEmpresa`;
+const baseUrlPost = `${apiUrl}/agregarEmpresa`;
+const baseUrlPut = `${apiUrl}/editarEmpresa/`;
+const baseUrlDelete = `${apiUrl}/eliminarEmpresa/`;
 
 
 const Empresas = () => {
@@ -186,6 +187,9 @@ const Empresas = () => {
         <TextField  margin="normal" name="emp_cel1" label="Telefono 1" onChange={handleChange}/>
         <TextField  margin="normal" name="emp_conta2" label="Contacto 2" onChange={handleChange}/>
         <TextField  margin="normal" name="emp_cel2" label="Telefono 2" onChange={handleChange}/>
+        <Typography>Sube el logo de la empresa</Typography>
+        <input type="file" id="imagen" name="imagen" accept="image/png"/>
+        <br/>
         <Button variant="contained" sx={{backgroundColor: "#084720"}} onClick={() =>peticionPost()}>Insertar</Button>
         <Button variant="contained" sx={{backgroundColor: "#084720"}}   onClick={() => abrirCerrarModalInsertar()}>Cancelar</Button>
        
@@ -257,7 +261,7 @@ const Empresas = () => {
   return (
     <>
     <SidebarCostum/>
-    <Box m="20px">
+    <Box m="20px" sx={{width: "100%"}}>
       <Box sx={{ display: "flex" }}>
         <Typography variant="h3">Empresas</Typography>
         <Button onClick={() =>abrirCerrarModalInsertar()}>

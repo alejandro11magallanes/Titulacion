@@ -21,16 +21,17 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import apiUrl from "../../apiConfig";
 //url de las apis
-const baseUrl = "http://localhost:5656/verCliente";
-const baseUrlPost = "http://localhost:5656/agregarCliente";
-const baseUrlPut = "http://localhost:5656/editarCliente/";
-const baseUrlDelete = "http://localhost:5656/eliminarCliente/";
-const baseUrlEmpresasSelect = "http://localhost:5656/selectEmpresa";
-const baseUrlTipoSelect = "http://localhost:5656/selectTipoCli";
-const baseUrlCampanaSelect = "http://localhost:5656/selectXempcam";
-const baseUrlSucursalSelect = "http://localhost:5656/selectXempsuc";
-const baseUrlBuscarEmpresa = "http://localhost:5656/EmpCli";
+
+const baseUrlPost = `${apiUrl}/agregarCliente`;
+const baseUrlPut = `${apiUrl}/editarCliente/`;
+const baseUrlDelete = `${apiUrl}/eliminarCliente/`;
+const baseUrlEmpresasSelect = `${apiUrl}/selectEmpresa`;
+const baseUrlTipoSelect = `${apiUrl}/selectXempct`;
+const baseUrlCampanaSelect = `${apiUrl}/selectXempcam`;
+const baseUrlSucursalSelect = `${apiUrl}/selectXempsuc`;
+const baseUrlBuscarEmpresa = `${apiUrl}/EmpCli`;
 
 
 
@@ -100,7 +101,7 @@ const peticionGetCampanas = async () =>{
       Authorization: `Bearer ${token}`, 
     },
   };
-  await axios.get(baseUrlCampanaSelect, config).then((response) => {
+  await axios.post(baseUrlCampanaSelect,selectedEmpresa, config).then((response) => {
     setDataCampana(response.data.result);
   });
 }
@@ -112,7 +113,7 @@ const peticionGetSucursales = async () =>{
       Authorization: `Bearer ${token}`, 
     },
   };
-  await axios.get(baseUrlSucursalSelect, config).then((response) => {
+  await axios.post(baseUrlSucursalSelect,selectedEmpresa, config).then((response) => {
     setDataSucursal(response.data.result);
   });
 }
@@ -124,7 +125,7 @@ const peticionGetTipoCli = async () =>{
       Authorization: `Bearer ${token}`, 
     },
   };
-  await axios.get(baseUrlTipoSelect, config).then((response) => {
+  await axios.post(baseUrlTipoSelect,selectedEmpresa, config).then((response) => {
     setDataTipoCli(response.data.result);
   });
 }
@@ -203,7 +204,7 @@ const seleccionarUsuario=(usuario, caso)=>{
     const fetchData = async () => {
 
       await peticionGetEmpresas();
-      await peticionGetTipoCli();
+
     };
 
     fetchData();
@@ -277,7 +278,7 @@ const bodyInsertar = (
         ))}
       </Select>
       </FormControl>
-      <br/>
+      
       <FormControl fullWidth>
       <InputLabel id="demo-simple-select">Campaña</InputLabel>
       <Select
@@ -288,8 +289,8 @@ const bodyInsertar = (
         label="Empresa"
       >
        {dataCampana.map((empresa) => (
-          <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
-            {empresa.emp_nomcom}
+          <MenuItem key={empresa.cam_clave} value={empresa.cam_clave}>
+            {empresa.cam_nom}
           </MenuItem>
         ))}
       </Select>
@@ -304,12 +305,13 @@ const bodyInsertar = (
         label="Empresa"
       >
        {dataSucursal.map((empresa) => (
-          <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
-            {empresa.emp_nomcom}
+          <MenuItem key={empresa.suc_clave} value={empresa.suc_clave}>
+            {empresa.suc_nom}
           </MenuItem>
         ))}
       </Select>
       </FormControl>
+      <br/>
       <Button variant="contained" sx={{backgroundColor: "#084720"}} onClick={() =>peticionPost()}>Insertar</Button>
       <Button variant="contained" sx={{backgroundColor: "#084720"}}   onClick={() => abrirCerrarModalInsertar()}>Cancelar</Button>
      
@@ -387,14 +389,14 @@ const bodyEliminar=(
 return (
   <>
   <SidebarCostum/>
-    <Box m="20px">
+    <Box m="20px" sx={{width: "100%"}}>
       <Box sx={{ display: "flex" }}>
         <Typography variant="h3">Clientes</Typography>
         <Button onClick={() =>abrirCerrarModalInsertar()}>
           <AddCircleOutlineIcon fontSize="large" />
         </Button>
       </Box>
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex",width: "40%" }}>
       <FormControl fullWidth>
         <InputLabel id="demo-simple-select">Empresa</InputLabel>
         <Select

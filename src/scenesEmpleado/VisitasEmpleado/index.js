@@ -3,11 +3,9 @@ import {
   AppBar,
   Box,
   Button,
-  Container,
   CssBaseline,
   Toolbar,
   Typography,
-  useTheme,
   TextField,
   Select,
   InputLabel,
@@ -15,16 +13,16 @@ import {
   FormControl,
   Dialog,
   DialogTitle,
-  DialogContent,
   DialogActions,
 } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import companylogo from "../../images/company.png";
+import apiUrl from "../../apiConfig";
 import AddLocationAltIcon from "@mui/icons-material/AddLocationAlt";
-const UrlCampana = "http://localhost:5656/selectXempcam";
-const UrlBusqueda = "http://localhost:5656/busquedaXcel";
-const urlVisitas = "http://localhost:5656/agregarVisita";
+const UrlCampana = `${apiUrl}/selectXempcam`;
+const UrlBusqueda = `${apiUrl}/busquedaXcel`;
+const urlVisitas = `${apiUrl}/agregarVisita`;
 
 const VisitasEmpleado = () => {
   const nombre = localStorage.getItem("nombre");
@@ -39,7 +37,7 @@ const VisitasEmpleado = () => {
   const [celularInp, setCelularInp] = useState({
     cli_cel: "",
   });
-  const [selectedEmpresa, setSelectedEmpr] = useState({
+  const [selectedEmpresa] = useState({
     empresa: empresaSelected,
   });
   const id = localStorage.getItem("id");
@@ -83,6 +81,10 @@ const VisitasEmpleado = () => {
     });
   };
 
+  const validarTelefono = (telefono) => {
+    return telefono.length === 10 && /^\d+$/.test(telefono);
+  };
+
   const GuardarVisita = async () => {
     const token = localStorage.getItem("token");
 
@@ -91,6 +93,10 @@ const VisitasEmpleado = () => {
         Authorization: `Bearer ${token}`,
       },
     };
+    if (!nuevaVisita.vis_cam) {
+      alert("Por favor, seleccione una campaña antes de guardar la visita.");
+      return;
+    }
     await axios.post(urlVisitas, nuevaVisita, config).then((response) => {
       setOpenDialogdos(true);
     });
@@ -104,6 +110,10 @@ const VisitasEmpleado = () => {
         Authorization: `Bearer ${token}`,
       },
     };
+    if (!validarTelefono(celularInp.cli_cel)) {
+      alert("Por favor, ingrese un número de teléfono válido (10 dígitos).");
+      return;
+    }
 
     try {
       const response = await axios.post(UrlBusqueda, celularInp, config);
@@ -131,7 +141,7 @@ const VisitasEmpleado = () => {
     };
 
     fetchData();
-  }, []);
+  });
 
   const handleCloseDialog = () => {
     setOpenDialog(false); // Cierra el diálogo
@@ -173,7 +183,7 @@ const VisitasEmpleado = () => {
               justifyContent: "space-between",
             }}
           >
-            <img src={companylogo} style={{ height: "40px" }} />
+            <img src={companylogo} style={{ height: "40px" }} alt="logo"/>
             <Typography variant="body1" style={{ textAlign: "right" }}>
               Hola! {nombre}
             </Typography>

@@ -7,14 +7,13 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
-import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import BusinessIcon from '@mui/icons-material/Business';
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import GroupsIcon from '@mui/icons-material/Groups';
 import Groups3Icon from '@mui/icons-material/Groups3';
 import "./styles.css";
+import CompanyLogo from '../../images/company.png';
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   return (
@@ -76,13 +75,22 @@ const SidebarCostum = () => {
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />
                 </IconButton>
+                
               </Box>
             )}
           </MenuItem>
 
           {!isCollapsed && (
-            <Box mb="0px">
-         
+            <Box mb="25px">
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <img
+                  alt="profile-user"
+                  width="80px"
+                  height="80px"
+                  src={CompanyLogo}
+                  style={{ cursor: "pointer", borderRadius: "50%" }}
+                />
+              </Box>
             </Box>
           )}
 
@@ -132,14 +140,6 @@ const SidebarCostum = () => {
               setSelected={setSelected}
             />
             <Item
-              title={<span style={{ fontSize: 'smaller' }}>Exportacion de Visitas</span>}
-              to="/registrovisitas"
-              icon={<HelpOutlineOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-
-            <Item
               title="Campañas"
               to="/campanas"
               icon={<BarChartOutlinedIcon />}
@@ -147,23 +147,18 @@ const SidebarCostum = () => {
               setSelected={setSelected}
             />
             <Item
-              title="Campañas X Cliente"
-              to="/pie"
+              title={<span style={{ fontSize: 'smaller' }}>Exportacion de Visitas</span>}
+              to="/registrovisitas"
+              icon={<HelpOutlineOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+
+            
+            <Item
+               title={<span style={{ fontSize: 'smaller' }}>Reportes de Visitas</span>}
+              to="/reportes"
               icon={<PieChartOutlineOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Clientes X Tipo"
-              to="/line"
-              icon={<TimelineOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Reporte Clientes"
-              to="/geography"
-              icon={<MapOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />

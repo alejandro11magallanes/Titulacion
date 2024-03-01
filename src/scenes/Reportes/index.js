@@ -1,4 +1,4 @@
-import React, { useEffect, useState,  } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import apiUrl from "../../apiConfig";
 import SidebarCostum from "../global/Sidebar";
@@ -21,20 +21,25 @@ import {
 
 const BuscarEmpresa = `${apiUrl}/selectEmpresa`;
 const TiposDeClientesXEmpresa = `${apiUrl}/selectXempct`;
-const ReporteVisitas = `${apiUrl}/ExportarReporte`;
+const EmpleadosXEmpresa = `${apiUrl}/selectXempusu`;
+const ReporteVisitas = `${apiUrl}/ReporteUsu`;
 
-const Visitas = () => {
+const Reportes = () => {
   const [data, setData] = useState([]);
   const [dataEmpresas, setDataEmpresas] = useState([]);
+  const [contador, setContador] = useState(0);
   const [dataTipoCliente, setDataTipoCliente] = useState([]);
+  const [dataEmpleado, setDataEmpleado] = useState([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState({
     empresa: "",
   });
   const [aparecerBox, setaparecerBox] = useState(false);
   const [aparecerTabla, setaparecerTabla] = useState(false);
+  const [aparecerTablaDos, setaparecerTablaDos] = useState(false);
   const [dataReporte, setDataReporte] = useState({
   empresa: selectedEmpresa.empresa,
-	nuevo: 0, 
+	nuevo: 0,
+    usuario: '', 
 	tipo: '',
 	inicio: '',
 	fin:'',
@@ -74,7 +79,6 @@ const Visitas = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Realizar la petición solo si hay una empresa seleccionada
       if (selectedEmpresa.empresa) {
         const token = localStorage.getItem("token");
         const config = {
@@ -82,28 +86,40 @@ const Visitas = () => {
             Authorization: `Bearer ${token}`,
           },
         };
+  
         try {
-          const response = await axios.post(
-            TiposDeClientesXEmpresa,
-            selectedEmpresa,
-            config
-          );
+          // Realizar ambas peticiones al mismo tiempo
+          const [tiposClientesResponse, empleadosResponse] = await Promise.all([
+            axios.post(TiposDeClientesXEmpresa, selectedEmpresa, config),
+            axios.post(EmpleadosXEmpresa, selectedEmpresa, config),
+          ]);
+  
+          // Procesar la respuesta de tipos de clientes
           setDataTipoCliente([
             { tip_clave: "0", tip_nom: "Todos" },
-            ...response.data.result,
+            ...tiposClientesResponse.data.result,
           ]);
+          setDataEmpleado([
+            { usu_numctrl: "0", usu_nombre: "Todos" },
+            ...empleadosResponse.data.result,
+          ]);
+        
           setaparecerBox(true);
+  
+          // Procesar la respuesta de empleados
+         
         } catch (error) {
-          console.error("Error al obtener tipos de cliente:", error);
+          console.error("Error al obtener datos:", error);
         }
       } else {
         setDataTipoCliente([]); // Limpiar los tipos de cliente si no hay empresa seleccionada
+        setDataEmpleado([]); // Limpiar los empleados si no hay empresa seleccionada
         setaparecerBox(false);
       }
     };
-
+  
     fetchData();
-  }, [selectedEmpresa]); // Ejecutar este efecto cuando selectedEmpresa cambie
+  }, [selectedEmpresa]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,12 +150,21 @@ const Visitas = () => {
     await axios.post(ReporteVisitas, dataReporte, config)
     .then(response=>{
       setData(response.data.result);
-      setaparecerTabla(true)
+      setContador(response.data.contador);
+      if(dataReporte.tipo != 0){
+        setaparecerTabla(true)
+      }
+      else{
+        setaparecerTablaDos(true)
+      }
+      console.log(response.data.result);
     })
   }
-  const header = ["Clave Empresa"	,"Nombre Empresa"	,"Tipo Cliente",	"Nombre",	"Fecha Visita"	,"Clave Cliente",	"Nombre Cliente",	"Celular"];
-  function handleDownloadExcel() {
-    const dataFormatted = JSON.parse(JSON.stringify(data));
+
+ 
+  const handleDownloadExcel= (header) =>{
+    // Copia profunda del array de datos
+  const dataFormatted = JSON.parse(JSON.stringify(data));
 
   // Formatear las fechas en el array copiado
   dataFormatted.forEach(item => {
@@ -157,7 +182,19 @@ const Visitas = () => {
       sheet: "reporte",
       tablePayload: {
         header,
-        body: dataFormatted
+        body: dataFormatted 
+      },
+    });
+  }
+
+  const handleDownloadExcelDos =(header) =>{
+   
+    downloadExcel({
+      fileName: "reporte",
+      sheet: "reporte",
+      tablePayload: {
+        header,
+        body: data
       },
     });
   }
@@ -165,11 +202,11 @@ const Visitas = () => {
   return (
     <>
       <SidebarCostum />
-      <Box m="20px">
+      <Box m="20px" sx={{width: "100%"}}>
         <Box>
           <Typography variant="h4">Exportar Visitas por empresa</Typography>
           <br />
-          <Box sx={{ display: "flex" }}>
+          <Box sx={{ display: "flex", width: "50%" }}>
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select">Empresa</InputLabel>
               <Select
@@ -190,7 +227,26 @@ const Visitas = () => {
           </Box>
           <br />
           {aparecerBox && (
-            <Box>
+            <Box sx={{width: "50%"}}>
+                <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-dos">
+                  Empleado
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-dos"
+                  id="demo-simple-select-dos"
+                  name="usuario"
+                  onChange={handleReporte}
+                  label="Empleado"
+                >
+                  {dataEmpleado.map((tipo) => (
+                    <MenuItem key={tipo.usu_numctrl} value={tipo.usu_numctrl}>
+                      {tipo.usu_nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <br/><br/>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-dos">
                   Tipo de Cliente
@@ -236,34 +292,50 @@ const Visitas = () => {
           )}
         </Box>
         {aparecerTabla && (
-          <Box>
-         <Button onClick={handleDownloadExcel} sx={{ backgroundColor: "#084720", paddingTop: "10px", marginLeft: "85%" }}> Exportar excel </Button>
-
+          <Box sx={{width: "100%"}}>
+         <Button onClick={()=>handleDownloadExcel(["Fecha","Nombre Cliente","Celular",	"Tipo Cliente"])} sx={{ backgroundColor: "#084720", paddingTop: "10px", marginLeft: "85%", color: "#fff" }}> Exportar excel </Button>
+        <Typography>Numero de Visitas: {contador}</Typography>
      <TableContainer>
           <Table sx={{border: "2px solid #ccc"}} >
             <TableHead sx={{backgroundColor: "#084720"}}>
               <TableRow >
-                <TableCell sx={{color: "#fff"}}>Clave Empresa</TableCell>
-                <TableCell sx={{color: "#fff"}}>Nombre Empresa</TableCell>
-                <TableCell sx={{color: "#fff"}}>Tipo Cliente</TableCell>
-                <TableCell sx={{color: "#fff"}}>Nombre</TableCell>
-                <TableCell sx={{color: "#fff"}}>Fecha Visita</TableCell>
-                <TableCell sx={{color: "#fff"}}>Clave Cliente</TableCell>
+                <TableCell sx={{color: "#fff"}}>Fecha</TableCell>
                 <TableCell sx={{color: "#fff"}}>Nombre Cliente</TableCell>
                 <TableCell sx={{color: "#fff"}}>Celular</TableCell>
+                <TableCell sx={{color: "#fff"}}>Tipo Cliente</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.map((consola) => (
-                <TableRow key={consola.emp_clave}>
-                  <TableCell>{consola.emp_clave}</TableCell>
-                  <TableCell>{consola.emp_nomcom}</TableCell>
-                  <TableCell>{consola.tip_clave}</TableCell>
-                  <TableCell>{consola.tip_nom}</TableCell>
+                <TableRow key={consola.vis_fecha}>
                   <TableCell>{consola.vis_fecha}</TableCell>
-                  <TableCell>{consola.cli_clave}</TableCell>
                   <TableCell>{consola.cli_nomcom}</TableCell>
                   <TableCell>{consola.cli_cel}</TableCell>
+                  <TableCell>{consola.tip_nom}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer></Box>
+          
+        )}
+        {aparecerTablaDos && (
+          <Box>
+         <Button onClick={()=>handleDownloadExcelDos(["Usuario","Visitas"])} sx={{ backgroundColor: "#084720", paddingTop: "10px", marginLeft: "85%", color: "#fff" }}> Exportar excel </Button>
+         <Typography>Numero de Visitas: {contador}</Typography>
+     <TableContainer>
+          <Table sx={{border: "2px solid #ccc", width: "40%"}} >
+            <TableHead sx={{backgroundColor: "#084720"}}>
+              <TableRow >
+                <TableCell sx={{color: "#fff"}}>Usuario</TableCell>
+                <TableCell sx={{color: "#fff"}}>Visitas</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((consola) => (
+                <TableRow key={consola.usu_nombre}>
+                  <TableCell>{consola.usu_nombre}</TableCell>
+                  <TableCell>{consola.visitas}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -276,4 +348,4 @@ const Visitas = () => {
   );
 };
 
-export default Visitas;
+export default Reportes;

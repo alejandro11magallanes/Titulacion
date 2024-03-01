@@ -12,6 +12,7 @@ import Visitas from './scenes/visitas';
 import InicioEmpleado from './scenesEmpleado/InicioEmpleado';
 import ClienteEmpleado from './scenesEmpleado/ClienteEmpleado';
 import VisitasEmpleado from './scenesEmpleado/VisitasEmpleado';
+import Reportes from './scenes/Reportes';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Route path='/registroclientes' element={<Clientes />} />
       <Route path='/campanas' element={<Campanas />} />
       <Route path='/registrovisitas' element={<Visitas />} />
+      <Route path='/reportes' element={<Reportes />} />
       <Route path='/inicioEmpleado' element={<InicioEmpleado />} />
       <Route path='/clienteEmpleado' element={<ClienteEmpleado />} />
       <Route path='/visitasEmpleado' element={<VisitasEmpleado />} />

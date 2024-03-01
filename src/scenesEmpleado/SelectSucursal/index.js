@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import apiUrl from "../../apiConfig";
 import {
   Box,
   Typography,
@@ -11,15 +12,17 @@ import {
   FormControl,
 } from "@mui/material";
 import "./index.css";
-const baseUrl = "http://localhost:5656/selectXempsuc";
+const baseUrl =`${apiUrl}/selectXempsuc`;
+const UrlTLogout = `${apiUrl}/logout`;
 
 
 const SelectSucursal = () => {
 const navigate = useNavigate();
   const nombre = localStorage.getItem("nombre");
   const empresaSelect = localStorage.getItem("empresa");
+  const empresaNombre = localStorage.getItem("nombreEmpresa");
   const [dataSucursal, setDataSucursal]= useState([]);
-  const [selectedSucursales, setSelectedEmpresa] = useState({
+  const [selectedSucursales] = useState({
     empresa: empresaSelect,
   });
   const [selectedSucursal, setSelectedSucursal] = useState(null); 
@@ -44,8 +47,26 @@ const navigate = useNavigate();
     };
 
     fetchData();
-  }, []);
+  });
 
+  
+  const CerrarSesion = async () =>{
+    const token = localStorage.getItem("token"); 
+     
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      },
+    };
+    await axios.post(UrlTLogout,{}, config).then((response) => {
+      localStorage.clear();
+    });
+  }
+  const Logout = () => {
+    CerrarSesion()
+    navigate("/");
+    
+  };
   const handleClick = () => {
     if (selectedSucursal) {
       const sucursalSeleccionada = dataSucursal.find(
@@ -79,7 +100,10 @@ const navigate = useNavigate();
         <Typography variant="h4" sx={{ textAlign: "center", color: "#fff" }}>
           Hola! {nombre}
         </Typography>
-        <Typography variant="h5" sx={{ textAlign: "center", color: "#fff"}}>
+        <Typography variant="h6" sx={{ textAlign: "center", color: "#fff" }}>
+          Empresa: {empresaNombre}
+        </Typography>
+        <Typography variant="h6" sx={{ textAlign: "center", color: "#fff"}}>
           Selecciona la Sucursal en donde te encuentras
         </Typography>
         <FormControl fullWidth>
@@ -92,6 +116,7 @@ const navigate = useNavigate();
             sx={{ backgroundColor: "#fff"}}
             value={selectedSucursal} // Asigna el valor seleccionado al estado
             onChange={(e) => setSelectedSucursal(e.target.value)}
+            
           >
              {dataSucursal.map((sucursal) => (
             <MenuItem key={sucursal.suc_clave} value={sucursal.suc_clave}>
@@ -101,8 +126,12 @@ const navigate = useNavigate();
           </Select>
         </FormControl>
         <br />
-        <Button variant="contained" sx={{ backgroundColor: "#00ff00" }} onClick={handleClick}>
+        <Button variant="contained" sx={{ backgroundColor: "#00ff00", width: "50%" }} onClick={handleClick}>
           Listo
+        </Button>
+        <br />
+        <Button variant="contained" sx={{ backgroundColor: "#00ff00", width: "50%" }} onClick={()=>Logout()}>
+          Salir
         </Button>
       </Box>
     </div>
