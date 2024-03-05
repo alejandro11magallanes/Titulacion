@@ -13,11 +13,15 @@ import InicioEmpleado from './scenesEmpleado/InicioEmpleado';
 import ClienteEmpleado from './scenesEmpleado/ClienteEmpleado';
 import VisitasEmpleado from './scenesEmpleado/VisitasEmpleado';
 import Reportes from './scenes/Reportes';
+import UsuariosEmpresa from './scenesEmpresa/UsuariosEmpresa';
+
 
 function App() {
   return (
-    <div className="App">        
+    <div className="App">      
+
     <Routes>
+    
       <Route path='/' element={<Login/>} />
       <Route path='/dashboard' element={<Dashboard />} />
       <Route path='/empresas' element={<Empresas />} />
@@ -31,8 +35,9 @@ function App() {
       <Route path='/inicioEmpleado' element={<InicioEmpleado />} />
       <Route path='/clienteEmpleado' element={<ClienteEmpleado />} />
       <Route path='/visitasEmpleado' element={<VisitasEmpleado />} />
+      <Route path='/tususuarios' element={<UsuariosEmpresa />} />
     </Routes> 
-   
+ 
     </div>
   );
 }

@@ -1,92 +1,46 @@
 import { useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import BusinessIcon from '@mui/icons-material/Business';
-import AddBusinessIcon from '@mui/icons-material/AddBusiness';
-import GroupsIcon from '@mui/icons-material/Groups';
-import Groups3Icon from '@mui/icons-material/Groups3';
+
+import AddBusinessIcon from "@mui/icons-material/AddBusiness";
+
+import Groups3Icon from "@mui/icons-material/Groups3";
 import "./styles.css";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   return (
+    <Tooltip title={title} placement="right">
+       
     <MenuItem
       component={<Link to={to} />}
       active={selected === title}
-      style={{}}
+      style={{ backgroundColor: selected === title ? 'rgb(45, 196, 45)' : 'inherit',
+      color: selected === title ? 'white' : 'inherit' }}
       onClick={() => setSelected(title)}
-      icon={icon}
+     icon={icon}
     >
-      <Typography>{title}</Typography>
     </MenuItem>
+    </Tooltip>
   );
 };
 
-const SidebarCostumEmpresa = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+const SidebarCostumEmpresa = ({selectedItem}) => {
+  const [selected, setSelected] = useState(selectedItem);
 
   return (
-    <Box
-      className="backsidebar"
-      sx={{
-        "& .pro-sidebar-inner": {
-          background: `#2b5865 !important`,
-        },
-        "& .pro-icon-wrapper": {
-          backgroundColor: "transparent !important",
-        },
-        "& .pro-inner-item": {
-          padding: "5px 35px 5px 20px !important",
-        },
-        "& .pro-inner-item:hover": {
-          color: "#2b5865 !important",
-        },
-        "& .pro-menu-item.active": {
-          color: "#2b5865 !important",
-        },
-      }}
-    >
-      <Sidebar collapsed={isCollapsed}>
+    <Box>
+      <Sidebar collapsed={true}>
         <Menu iconShape="square">
-          {/* LOGO AND MENU ICON */}
-          <MenuItem
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
-            style={{
-              margin: "10px 0 20px 0",
-            }}
-          >
-            {!isCollapsed && (
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                ml="15px"
-              >
-                <Typography variant="h5">Empresario</Typography>
-                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-                  <MenuOutlinedIcon />
-                </IconButton>
-              </Box>
-            )}
-          </MenuItem>
-
-          {!isCollapsed && (
-            <Box mb="0px">
-         
-            </Box>
-          )}
-
-          <Box paddingLeft={isCollapsed ? undefined : "10%"}>
+          <Box sx={{height: "100vh"}}>
             <Item
               title="Inicio"
               to="/dashboard"
@@ -94,17 +48,9 @@ const SidebarCostumEmpresa = () => {
               selected={selected}
               setSelected={setSelected}
             />
-
-            {/* <Item
-              title="Empresas"
-              to="/empresas"
-              icon={<BusinessIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            /> */}
             <Item
               title="Usuarios"
-              to="/usuarios"
+              to="/tususuarios"
               icon={<PersonOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -116,14 +62,6 @@ const SidebarCostumEmpresa = () => {
               selected={selected}
               setSelected={setSelected}
             />
-
-            {/* <Item
-              title="Tipo de Cliente"
-              to="/tipoclientes"
-              icon={<GroupsIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            /> */}
             <Item
               title="Registro de Clientes"
               to="/registroclientes"

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SidebarCostum from "../global/Sidebar";
+
 import {
   Box,
   Typography,
@@ -28,7 +29,9 @@ const baseUrlDelete = `${apiUrl}/eliminarEmpresa/`;
 const Empresas = () => {
 //declaraciones de useState
   const [data, setData] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const [modalInsertar, setModalInsertar] = useState(false);
+  const [imgEmpresa, setImgEmpresa] = useState(null);
   const [modalEditar, setModalEditar]=useState(false);
   const [modalEliminar, setModalEliminar]=useState(false);
 //seteo de entidad
@@ -43,10 +46,22 @@ const Empresas = () => {
     emp_cel1: '',
     emp_conta2: '',
     emp_cel2: '',
-    emp_status: 1
+    emp_status: 1,
+    emp_logo:null,
   })
 //cierro seteo de entidad
-
+const handleImageChange = (e) => {
+  const selectedFile = e.target.files[0];
+  setImgEmpresa(selectedFile);
+  console.log(imgEmpresa)
+  if (selectedFile) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result); 
+    };
+    reader.readAsDataURL(selectedFile);
+  }
+};
 //construccion de entidad 
   const handleChange=e=>{
     const {name, value}=e.target;
@@ -54,7 +69,6 @@ const Empresas = () => {
       ...prevState,
       [name]: value
     }))
-    console.log(nuevaEpresa);
   }
 
 //cierro construccion de entidad
@@ -80,7 +94,18 @@ const Empresas = () => {
         Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
       },
     };
-    await axios.post(baseUrlPost, nuevaEpresa, config)
+    const formData = new FormData();
+    formData.append('emp_logo', imgEmpresa);
+    formData.append('emp_nomcom', nuevaEpresa.emp_nomcom);
+    formData.append('emp_razon', nuevaEpresa.emp_razon);
+    formData.append('emp_cp', nuevaEpresa.emp_cp);
+    formData.append('emp_calle', nuevaEpresa.emp_calle);
+    formData.append('emp_cd', nuevaEpresa.emp_cd);
+    formData.append('emp_conta1', nuevaEpresa.emp_conta1);
+    formData.append('emp_cel1', nuevaEpresa.emp_cel1);
+    formData.append('emp_conta2', nuevaEpresa.emp_conta2);
+    console.log(formData);
+    await axios.post(baseUrlPost, formData, config)
     .then(response=>{
       setData(data.concat(response.data.result))
       abrirCerrarModalInsertar()
@@ -147,6 +172,7 @@ const Empresas = () => {
 
   const abrirCerrarModalInsertar = () => {
     setModalInsertar(!modalInsertar);
+    setPreviewImage(null);
   };
 
   const abrirCerrarModalEditar=()=>{
@@ -156,6 +182,8 @@ const Empresas = () => {
   const abrirCerrarModalEliminar=()=>{
     setModalEliminar(!modalEliminar);
   }
+
+ 
 //cierro efectos de modal
 
 //construccion de modal
@@ -188,9 +216,11 @@ const Empresas = () => {
         <TextField  margin="normal" name="emp_conta2" label="Contacto 2" onChange={handleChange}/>
         <TextField  margin="normal" name="emp_cel2" label="Telefono 2" onChange={handleChange}/>
         <Typography>Sube el logo de la empresa</Typography>
-        <input type="file" id="imagen" name="imagen" accept="image/png"/>
-        <br/>
+        <input type="file" accept="image/png" onChange={handleImageChange}/>
+        {previewImage && <img src={previewImage} alt="Preview" style={{ maxWidth: '100px', maxHeight: '100px', marginLeft: "100px" }} />}
+        <br/><br/>
         <Button variant="contained" sx={{backgroundColor: "#084720"}} onClick={() =>peticionPost()}>Insertar</Button>
+       
         <Button variant="contained" sx={{backgroundColor: "#084720"}}   onClick={() => abrirCerrarModalInsertar()}>Cancelar</Button>
        
       </Box>
@@ -225,7 +255,7 @@ const Empresas = () => {
         <TextField  margin="normal" name="emp_conta2" label="Contacto 2" onChange={handleChange} value={nuevaEpresa && nuevaEpresa.emp_conta2}/>
         <TextField  margin="normal" name="emp_cel2" label="Telefono 2" onChange={handleChange} value={nuevaEpresa && nuevaEpresa.emp_cel2}/>
         <label>Subir Imagen</label>
-        <input  type="file" name="emp_img" accept="image/png" onChange={handleChange}/>
+        <input  type="file"  accept="image/png" />
         <Button variant="contained" sx={{backgroundColor: "#084720"}} onClick={() =>peticionPut()}>Editar</Button>
         <Button variant="contained" sx={{backgroundColor: "#084720"}}   onClick={() => abrirCerrarModalEditar()}>Cancelar</Button>
        

@@ -24,7 +24,7 @@ const Dashboard = () => {
   else if(rol == 2){
     return (
       <>
-      <SidebarCostumEmpresa/>
+      <SidebarCostumEmpresa selectedItem="Inicio"/>
       <Box m="50px">
         <Typography variant="h4">
           Bienvenido a la plataforma {nombre}
