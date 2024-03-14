@@ -13,7 +13,7 @@ import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import GroupsIcon from '@mui/icons-material/Groups';
 import Groups3Icon from '@mui/icons-material/Groups3';
 import "./styles.css";
-import CompanyLogo from '../../images/company.png';
+
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   return (
@@ -80,19 +80,7 @@ const SidebarCostum = () => {
             )}
           </MenuItem>
 
-          {!isCollapsed && (
-            <Box mb="25px">
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <img
-                  alt="profile-user"
-                  width="80px"
-                  height="80px"
-                  src={CompanyLogo}
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
-                />
-              </Box>
-            </Box>
-          )}
+         
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item

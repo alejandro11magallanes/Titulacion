@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React,{ useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
 import { Box, Tooltip } from "@mui/material";
@@ -8,9 +8,12 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import SpatialAudioIcon from '@mui/icons-material/SpatialAudio';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-
+import PeopleIcon from '@mui/icons-material/People';
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 
 import Groups3Icon from "@mui/icons-material/Groups3";
@@ -23,11 +26,26 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
     <MenuItem
       component={<Link to={to} />}
       active={selected === title}
-      style={{ backgroundColor: selected === title ? 'rgb(45, 196, 45)' : 'inherit',
-      color: selected === title ? 'white' : 'inherit' }}
+      style={{
+        backgroundColor: selected === title ? 'transparent' : 'inherit',
+        color:selected === title ? 'rgb(45, 196, 45)': 'inherit',
+      }}
       onClick={() => setSelected(title)}
-     icon={icon}
+   
     >
+       {icon}
+        <div
+          style={{
+            width: selected === title ? '10%' : 0,
+            backgroundColor: 'rgb(45, 196, 45)',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 1,
+            transition: 'width 0.3s ease',
+          }}
+        ></div>
     </MenuItem>
     </Tooltip>
   );
@@ -49,59 +67,55 @@ const SidebarCostumEmpresa = ({selectedItem}) => {
               setSelected={setSelected}
             />
             <Item
+              title="Empresa"
+              to="/tuempresa"
+              icon={<ApartmentIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
               title="Usuarios"
               to="/tususuarios"
-              icon={<PersonOutlinedIcon />}
+              icon={<PeopleIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="Sucursales"
-              to="/sucursales"
+              to="/tusucursales"
               icon={<AddBusinessIcon />}
               selected={selected}
               setSelected={setSelected}
             />
+
             <Item
-              title="Registro de Clientes"
-              to="/registroclientes"
-              icon={<Groups3Icon />}
+              title="Clientes"
+              to="/tusclientes"
+              icon={<PersonOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Registro de Visitas"
-              to="/registrovisitas"
-              icon={<HelpOutlineOutlinedIcon />}
+              title="Tipos de Cliente"
+              to="/tustiposdecliente"
+              icon={<Groups3Icon />}
               selected={selected}
               setSelected={setSelected}
             />
 
             <Item
               title="Campañas"
-              to="/campanas"
-              icon={<BarChartOutlinedIcon />}
+              to="/tuscampanas"
+              icon={<SpatialAudioIcon />}
               selected={selected}
               setSelected={setSelected}
             />
+           
+            
             <Item
-              title="Campañas X Cliente"
-              to="/pie"
-              icon={<PieChartOutlineOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Clientes X Tipo"
-              to="/line"
-              icon={<TimelineOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Reporte Clientes"
-              to="/geography"
-              icon={<MapOutlinedIcon />}
+              title="Reportes"
+              to="/tusreportes"
+              icon={<DescriptionIcon />}
               selected={selected}
               setSelected={setSelected}
             />

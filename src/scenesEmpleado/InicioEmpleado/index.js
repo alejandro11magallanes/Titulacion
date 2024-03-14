@@ -41,7 +41,7 @@ function MyScreen() {
   };
   const Logout = () => {
     CerrarSesion()
-    navigate("/");
+    window.location.href = '/';
     
   };
 

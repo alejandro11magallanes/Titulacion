@@ -24,73 +24,40 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import apiUrl from "../../apiConfig";
-const baseUrlPost = `${apiUrl}/agregarUsuario`;
-const baseUrlPut = `${apiUrl}/editarUsuario/`;
-const baseUrlDelete = `${apiUrl}/eliminarUsuario/`;
-const baseUrlBuscarEmpresa = `${apiUrl}/EmpUsu`;
+const baseUrlPost = `${apiUrl}/agregarSucursal`;
+const baseUrlPut = `${apiUrl}/editarSucursal/`;
+const baseUrlDelete = `${apiUrl}/eliminarSucursal/`;
+const baseUrlBuscarEmpresa = `${apiUrl}/EmpSuc`;
 
-const UsuariosEmpresa = () => {
+const SucuralesEmpresa = () => {
   const [data, setData] = useState([]);
-  const empresaUsuario = localStorage.getItem("empresa");
   const [dataEmpresas, setDataEmpresas] = useState([]);
+  const empresaUsuario = localStorage.getItem("empresa");
   const [modalInsertar, setModalInsertar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
   const [modalEliminar, setModalEliminar] = useState(false);
   const [selectedEmpresa, setSelectedEmpresa] = useState({
     empresa: empresaUsuario,
   });
-  //seteo de entidad
-  const [nuevaUsuario, setnuevoUsuario] = useState({
+  const [nuevaSucursal, setnuevaSucursal] = useState({
     emp_clave: empresaUsuario,
-    usu_correo: "",
-    usu_nombre: "",
-    usu_contra: "",
-    usu_tipo: "3",
+    suc_nom: "",
+    suc_tel: "",
+    suc_conta: "",
+    suc_cel: "",
+    suc_calle: "",
+    suc_col: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setnuevoUsuario((prevState) => ({
+    setnuevaSucursal((prevState) => ({
       ...prevState,
       [name]: value,
     }));
-  
+    console.log(nuevaSucursal);
   };
 
-  const validateForm = () => {
-    const errors = {};
-    if (!nuevaUsuario.usu_nombre) {
-      errors.usu_nombre = "El nombre es requerido";
-    } else if (!validarNombre(nuevaUsuario.usu_nombre)) {
-      errors.usu_nombre = "El nombre debe tener minimo 8 caracteres";
-    }
-    if (!nuevaUsuario.usu_correo) {
-      errors.usu_correo = "El correo es requerido";
-    } else if (!isValidEmail(nuevaUsuario.usu_correo)) {
-      errors.usu_correo = "El correo electrónico no es válido";
-    }
-    if (!nuevaUsuario.usu_contra) {
-      errors.usu_contra = "La contraseña es requerida";
-    } else if (!validarContra(nuevaUsuario.usu_contra)) {
-      errors.usu_contra = "La contraseña debe tener minimo 6 caracteres";
-    }
-
-    // Puedes agregar más validaciones aquí según tus necesidades
-    return errors;
-  };
-  const isValidEmail = (email) => {
-    // Expresión regular para validar el formato de un correo electrónico
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-  const validarNombre = (nombre) => {
-    // Verificar que el nombre tenga al menos 8 caracteres
-    return nombre.length >= 8;
-  };
-  const validarContra = (password) => {
-    // Verificar que el nombre tenga al menos 8 caracteres
-    return password.length >= 6;
-  };
   const peticionGet = async () => {
     const token = localStorage.getItem("token");
 
@@ -99,12 +66,41 @@ const UsuariosEmpresa = () => {
         Authorization: `Bearer ${token}`,
       },
     };
+
     await axios
       .post(baseUrlBuscarEmpresa, selectedEmpresa, config)
       .then((response) => {
         setData(response.data.result);
       });
   };
+
+  const validateForm = () => {
+    const errors = {};
+    if (!nuevaSucursal.suc_nom) {
+      errors.suc_nom = "El nombre es requerido";
+    }
+    if (!nuevaSucursal.suc_tel) {
+      errors.suc_tel = "El telefono es requerido";
+    } else if (!validarTelefono(nuevaSucursal.suc_tel)) {
+      errors.suc_tel = "El telefono debe de tener exactamente 10 digitos";
+    }
+    if (!nuevaSucursal.suc_cel) {
+      errors.suc_cel = "El celular es requerido";
+    } else if (!validarTelefono(nuevaSucursal.suc_cel)) {
+      errors.suc_cel = "El Celular debe de tener exactamente 10 digitos";
+    }
+    if (!nuevaSucursal.suc_conta) {
+      errors.suc_conta = "La Sucursal es requerida";
+    }
+    // Puedes agregar más validaciones aquí según tus necesidades
+    return errors;
+  };
+ 
+  const validarTelefono = (telefono) => {
+    // Verificar que el teléfono tenga 10 dígitos
+    return /^\d{10}$/.test(telefono);
+  };
+ 
 
   const peticionPost = async () => {
     const errors = validateForm();
@@ -115,58 +111,65 @@ const UsuariosEmpresa = () => {
           Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
         },
       };
-      await axios.post(baseUrlPost, nuevaUsuario, config).then((response) => {
+      await axios.post(baseUrlPost, nuevaSucursal, config).then((response) => {
         setData(data.concat(response.data.result));
         abrirCerrarModalInsertar();
-        setnuevoUsuario({
-          emp_clave: empresaUsuario,
-          usu_correo: "",
-          usu_nombre: "",
-          usu_contra: "",
-          usu_tipo: "3",
-        });
+        setnuevaSucursal({
+            emp_clave: empresaUsuario,
+            suc_nom: "",
+            suc_tel: "",
+            suc_conta: "",
+            suc_cel: "",
+            suc_calle: "",
+            suc_col: "",
+          });
       });
     } else {
       alert(Object.values(errors).join("\n"));
     }
   };
+
   const peticionPut = async () => {
     const errors = validateForm();
     if (Object.keys(errors).length === 0) {
-    const token = localStorage.getItem("token"); // Obtener el token de localStorage
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
-      },
-    };
-    await axios
-      .put(baseUrlPut + nuevaUsuario.usu_numctrl, nuevaUsuario, config)
-      .then((response) => {
-        var dataNueva = data;
-        dataNueva.map((consola) => {
-          if (nuevaUsuario.usu_numctrl === consola.usu_numctrl) {
-            consola.usu_nombre = nuevaUsuario.usu_nombre;
-            consola.usu_correo = nuevaUsuario.usu_correo;
-            consola.usu_contra = nuevaUsuario.usu_contra;
-          }
+      const token = localStorage.getItem("token"); // Obtener el token de localStorage
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
+        },
+      };
+      await axios
+        .put(baseUrlPut + nuevaSucursal.suc_clave, nuevaSucursal, config)
+        .then((response) => {
+          var dataNueva = data;
+          dataNueva.map((consola) => {
+            if (nuevaSucursal.suc_clave === consola.suc_clave) {
+              consola.suc_nom = nuevaSucursal.suc_nom;
+              consola.suc_tel = nuevaSucursal.suc_tel;
+              consola.suc_conta = nuevaSucursal.suc_conta;
+              consola.suc_cel = nuevaSucursal.suc_cel;
+              consola.suc_calle = nuevaSucursal.suc_calle;
+              consola.suc_col = nuevaSucursal.suc_col;
+            }
+          });
+          setData(dataNueva);
+          abrirCerrarModalEditar();
+          setnuevaSucursal({
+            emp_clave: empresaUsuario,
+            suc_nom: "",
+            suc_tel: "",
+            suc_conta: "",
+            suc_cel: "",
+            suc_calle: "",
+            suc_col: "",
+          });
         });
-        setData(dataNueva);
-        abrirCerrarModalEditar();
-        setnuevoUsuario({
-          emp_clave: empresaUsuario,
-          usu_correo: "",
-          usu_nombre: "",
-          usu_contra: "",
-          usu_tipo: "3",
-        });
-      });
-    }else {
+    } else {
       alert(Object.values(errors).join("\n"));
     }
   };
 
   const peticionDelete = async () => {
-    
     const token = localStorage.getItem("token"); // Obtener el token de localStorage
     const config = {
       headers: {
@@ -174,27 +177,29 @@ const UsuariosEmpresa = () => {
       },
     };
     await axios
-      .delete(baseUrlDelete + nuevaUsuario.usu_numctrl, config)
+      .delete(baseUrlDelete + nuevaSucursal.suc_clave, config)
       .then((response) => {
         setData(
           data.filter(
-            (consola) => consola.usu_numctrl !== nuevaUsuario.usu_numctrl
+            (consola) => consola.suc_clave !== nuevaSucursal.suc_clave
           )
         );
         abrirCerrarModalEliminar();
-        setnuevoUsuario({
+        setnuevaSucursal({
           emp_clave: empresaUsuario,
-          usu_correo: "",
-          usu_nombre: "",
-          usu_contra: "",
-          usu_tipo: "3",
+          suc_nom: "",
+          suc_tel: "",
+          suc_conta: "",
+          suc_cel: "",
+          suc_calle: "",
+          suc_col: "",
         });
       });
-      
   };
-
-  const seleccionarUsuario = (usuario, caso) => {
-    setnuevoUsuario(usuario);
+  //cierro peticiones a la api
+  //efectos de modal
+  const seleccionarSucursal = (sucursal, caso) => {
+    setnuevaSucursal(sucursal);
     caso === "Editar" ? abrirCerrarModalEditar() : abrirCerrarModalEliminar();
   };
 
@@ -217,12 +222,14 @@ const UsuariosEmpresa = () => {
   const abrirCerrarModalEliminar = () => {
     setModalEliminar(!modalEliminar);
   };
+  //cierro efectos de modal
+  //construccion de modal
 
   const bodyInsertar = (
     <div
       style={{
         position: "absolute",
-        width: 750,
+        width: 500,
         backgroundColor: "white",
         border: "2px solid #ccc",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
@@ -238,27 +245,42 @@ const UsuariosEmpresa = () => {
           "& > :not(style)": { m: 1, width: "25ch" },
         }}
       >
-        <h3>Agregar un Nuevo Usuario Empleado</h3>
+        <h3>Agregar Nueva Sucursal</h3>
         <TextField
           margin="normal"
-          name="usu_correo"
-          label="Correo"
-          onChange={handleChange}
-          autoComplete="off"
-        />
-        <TextField
-          margin="normal"
-          name="usu_nombre"
+          name="suc_nom"
           label="Nombre"
           onChange={handleChange}
-          autoComplete="off"
         />
         <TextField
           margin="normal"
-          name="usu_contra"
-          label="Contraseña"
+          name="suc_tel"
+          label="Telefono"
           onChange={handleChange}
-          autoComplete="off"
+        />
+        <TextField
+          margin="normal"
+          name="suc_conta"
+          label="Contacto"
+          onChange={handleChange}
+        />
+        <TextField
+          margin="normal"
+          name="suc_cel"
+          label="Celular"
+          onChange={handleChange}
+        />
+        <TextField
+          margin="normal"
+          name="suc_calle"
+          label="Calle"
+          onChange={handleChange}
+        />
+        <TextField
+          margin="normal"
+          name="suc_col"
+          label="Colonia"
+          onChange={handleChange}
         />
         <Button
           variant="contained"
@@ -282,7 +304,7 @@ const UsuariosEmpresa = () => {
     <div
       style={{
         position: "absolute",
-        width: 750,
+        width: 500,
         backgroundColor: "white",
         border: "2px solid #ccc",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
@@ -298,29 +320,49 @@ const UsuariosEmpresa = () => {
           "& > :not(style)": { m: 1, width: "25ch" },
         }}
       >
-        <h3>Editar Usuario</h3>
+        <h3>Editar Sucursal</h3>
         <TextField
           margin="normal"
-          name="usu_correo"
-          label="Correo"
-          onChange={handleChange}
-          value={nuevaUsuario && nuevaUsuario.usu_correo}
-        />
-        <TextField
-          margin="normal"
-          name="usu_nombre"
+          name="suc_nom"
           label="Nombre"
           onChange={handleChange}
-          value={nuevaUsuario && nuevaUsuario.usu_nombre}
+          value={nuevaSucursal && nuevaSucursal.suc_nom}
         />
         <TextField
           margin="normal"
-          name="usu_contra"
-          label="Contraseña"
+          name="suc_tel"
+          label="Telefono"
           onChange={handleChange}
-          value={nuevaUsuario && nuevaUsuario.usu_contra}
+          value={nuevaSucursal && nuevaSucursal.suc_tel}
         />
-        
+        <TextField
+          margin="normal"
+          name="suc_conta"
+          label="Contacto"
+          onChange={handleChange}
+          value={nuevaSucursal && nuevaSucursal.suc_conta}
+        />
+        <TextField
+          margin="normal"
+          name="suc_cel"
+          label="Celular"
+          onChange={handleChange}
+          value={nuevaSucursal && nuevaSucursal.suc_cel}
+        />
+        <TextField
+          margin="normal"
+          name="suc_calle"
+          label="Calle"
+          onChange={handleChange}
+          value={nuevaSucursal && nuevaSucursal.suc_calle}
+        />
+        <TextField
+          margin="normal"
+          name="suc_col"
+          label="Colonia"
+          onChange={handleChange}
+          value={nuevaSucursal && nuevaSucursal.suc_col}
+        />
         <Button
           variant="contained"
           sx={{ backgroundColor: "#084720" }}
@@ -356,11 +398,13 @@ const UsuariosEmpresa = () => {
     >
       <Box
         m="10px"
-        
+        sx={{
+          "& > :not(style)": { m: 1, width: "25ch" },
+        }}
       >
         <p>
-          Estás seguro que deseas eliminar al Usuario{" "}
-          <b>{nuevaUsuario && nuevaUsuario.usu_nombre}</b> ?{" "}
+          Estás seguro que deseas eliminar la Sucursal{" "}
+          <b>{nuevaSucursal && nuevaSucursal.suc_nom}</b> ?{" "}
         </p>
         <Button
           variant="contained"
@@ -371,7 +415,7 @@ const UsuariosEmpresa = () => {
         </Button>
         <Button
           variant="contained"
-          sx={{ backgroundColor: "#084720", marginLeft: "10%" }}
+          sx={{ backgroundColor: "#084720" }}
           onClick={() => abrirCerrarModalEliminar()}
         >
           Cancelar
@@ -379,18 +423,18 @@ const UsuariosEmpresa = () => {
       </Box>
     </div>
   );
-
+  //cierro construccion de modal
   return (
     <>
       <TopBar />
       <Grid container>
         <Grid>
-          <SidebarCostumEmpresa selectedItem="Usuarios" />
+          <SidebarCostumEmpresa selectedItem="Sucursales" />
         </Grid>
         <Grid sx={{ width: "90%" }}>
           <Box m="20px" sx={{ width: "100%" }}>
             <Box sx={{ display: "flex" }}>
-              <Typography variant="h4">Usuarios</Typography>
+              <Typography variant="h4">Sucursales</Typography>
               <Button onClick={() => abrirCerrarModalInsertar()}>
                 <AddCircleOutlineIcon fontSize="large" />
               </Button>
@@ -400,30 +444,32 @@ const UsuariosEmpresa = () => {
               <Table sx={{ border: "2px solid #ccc" }}>
                 <TableHead sx={{ backgroundColor: "#084720" }}>
                   <TableRow>
-                    <TableCell sx={{ color: "#fff" }}>Correo</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Clave</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Nombre</TableCell>
-                    <TableCell sx={{ color: "#fff" }}>Contraseña</TableCell>
-                    <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Telefono</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Contacto</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Celular</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {data.map((consola) => (
-                    <TableRow key={consola.usu_numctrl}>
-                      <TableCell>{consola.usu_correo}</TableCell>
-                      <TableCell>{consola.usu_nombre}</TableCell>
-                      <TableCell>{consola.usu_contra}</TableCell>
-                      <TableCell>{consola.usu_tipo}</TableCell>
+                    <TableRow key={consola.suc_clave}>
+                      <TableCell>{consola.suc_clave}</TableCell>
+                      <TableCell>{consola.suc_nom}</TableCell>
+                      <TableCell>{consola.suc_tel}</TableCell>
+                      <TableCell>{consola.suc_conta}</TableCell>
+                      <TableCell>{consola.suc_cel}</TableCell>
                       <TableCell>
                         <EditIcon
                           sx={{ cursor: "pointer" }}
-                          onClick={() => seleccionarUsuario(consola, "Editar")}
+                          onClick={() => seleccionarSucursal(consola, "Editar")}
                         />
                         &nbsp;
                         <DeleteIcon
                           sx={{ cursor: "pointer" }}
                           onClick={() =>
-                            seleccionarUsuario(consola, "Eliminar")
+                            seleccionarSucursal(consola, "Eliminar")
                           }
                         />
                       </TableCell>
@@ -453,4 +499,4 @@ const UsuariosEmpresa = () => {
     </>
   );
 };
-export default UsuariosEmpresa;
+export default SucuralesEmpresa;

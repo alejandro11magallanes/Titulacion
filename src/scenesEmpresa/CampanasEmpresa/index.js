@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import SidebarCostum from "../global/Sidebar";
-import TopBarSupervisor from "../global/TopBarSupervisor";
 import {
   Box,
   Typography,
@@ -14,52 +11,62 @@ import {
   Button,
   Modal,
   TextField,
+  Grid,
+  MenuItem,
   Select,
   InputLabel,
-  MenuItem,
   FormControl,
-  Grid,
 } from "@mui/material";
+import SidebarCostumEmpresa from "../../scenes/global/SidebarEmpresa";
+import TopBar from "../../scenes/global/TopBar";
+import axios from "axios";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 //url de las apis
+import apiUrl from "../../apiConfig";
 
-const baseUrlPost = "http://localhost:5656/agregarCampana";
-const baseUrlPut = "http://localhost:5656/editarCampana/";
-const baseUrlDelete = "http://localhost:5656/eliminarCampana/";
-const baseUrlEmpresasSelect = "http://localhost:5656/selectEmpresa";
-const baseUrlTipoSelect = "http://localhost:5656/selectTipoCli";
-const baseUrlBuscarEmpresa = "http://localhost:5656/EmpCam";
+const baseUrlPost = `${apiUrl}/agregarCampana`;
+const baseUrlPut = `${apiUrl}/editarCampana/`;
+const TiposDeClientesXEmpresa = `${apiUrl}/selectXempct`;
+const baseUrlDelete = `${apiUrl}/eliminarCampana/`;
+const baseUrlBuscarEmpresa = `${apiUrl}/EmpCam`;
+const urlImagenCampana = `${apiUrl}/traerImgCam`;
 
-const Campanas = () => {
-  //declaraciones de useState
+const CampanaEmpresa = () => {
   const [data, setData] = useState([]);
   const currentDate = new Date().toLocaleDateString();
   const [dataEmpresas, setDataEmpresas] = useState([]);
   const [dataTipoCli, setDataTipoCli] = useState([]);
+  const empresaUsuario = localStorage.getItem("empresa");
+  const [imgCampana, setImgCampana] = useState(null);
   const [modalInsertar, setModalInsertar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
+  const [imagenBlob, setImagenBlob] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [modalEliminar, setModalEliminar] = useState(false);
   //seteo de entidad
   const [nuevaCampana, setnuevaCampana] = useState({
-    emp_clave: "",
+    emp_clave: empresaUsuario,
     tip_clave: "",
     cam_nom: "",
     cam_desc: "",
+    cam_lanza: "",
+    cam_mensaje: "",
+    cam_imagen: null,
+    cam_estatus: true,
   });
   const [selectedEmpresa, setSelectedEmpresa] = useState({
-    empresa: "",
+    empresa: empresaUsuario,
   });
   //cierro seteo de entidad
-//logica para la fecha
-const [minDate, setMinDate] = useState('');
+  //logica para la fecha
+  const [minDate, setMinDate] = useState("");
 
   // Función para obtener la fecha actual
   const getCurrentDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0]; // Formato ISO: YYYY-MM-DD
+    return today.toISOString().split("T")[0]; // Formato ISO: YYYY-MM-DD
   };
 
   // Función para establecer la fecha mínima permitida
@@ -67,7 +74,7 @@ const [minDate, setMinDate] = useState('');
     const today = new Date();
     const twoDaysLater = new Date(today);
     twoDaysLater.setDate(today.getDate() + 2); // Añadir 2 días
-    setMinDate(twoDaysLater.toISOString().split('T')[0]);
+    setMinDate(twoDaysLater.toISOString().split("T")[0]);
   };
   useEffect(() => {
     setMinSelectableDate();
@@ -80,30 +87,24 @@ const [minDate, setMinDate] = useState('');
       ...prevState,
       [name]: value,
     }));
-    console.log(nuevaCampana);
   };
-  const handleEmpresaChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedEmpresa((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-    console.log(selectedEmpresa);
-  };
-  //Peticiones a la api
 
-  const peticionGetEmpresas = async () => {
+  const Logotipo = async (emp_clave) => {
     const token = localStorage.getItem("token");
 
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      responseType: "blob",
     };
-    await axios.get(baseUrlEmpresasSelect, config).then((response) => {
-      setDataEmpresas(response.data.result);
-    });
+    await axios
+      .post(urlImagenCampana, { campana: emp_clave }, config)
+      .then((response) => {
+        setImagenBlob(response.data);
+      });
   };
+
   const peticionGetTipoCli = async () => {
     const token = localStorage.getItem("token");
 
@@ -112,9 +113,11 @@ const [minDate, setMinDate] = useState('');
         Authorization: `Bearer ${token}`,
       },
     };
-    await axios.get(baseUrlTipoSelect, config).then((response) => {
-      setDataTipoCli(response.data.result);
-    });
+    await axios
+      .post(TiposDeClientesXEmpresa, selectedEmpresa, config)
+      .then((response) => {
+        setDataTipoCli(response.data.result);
+      });
   };
 
   const peticionGet = async () => {
@@ -139,9 +142,28 @@ const [minDate, setMinDate] = useState('');
         Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
       },
     };
-    await axios.post(baseUrlPost, nuevaCampana, config).then((response) => {
+    const formData = new FormData();
+    formData.append("tip_clave", nuevaCampana.tip_clave);
+    formData.append("cam_nom", nuevaCampana.cam_nom);
+    formData.append("cam_desc", nuevaCampana.cam_desc);
+    formData.append("cam_lanza", nuevaCampana.cam_lanza);
+    formData.append("cam_mensaje", nuevaCampana.cam_mensaje);
+    formData.append("emp_clave", nuevaCampana.emp_clave);
+    formData.append("cam_estatus", nuevaCampana.cam_estatus);
+    formData.append("cam_imagen", imgCampana);
+    await axios.post(baseUrlPost, formData, config).then((response) => {
       setData(data.concat(response.data.result));
       abrirCerrarModalInsertar();
+    });
+    setnuevaCampana({
+      emp_clave: empresaUsuario,
+      tip_clave: "",
+      cam_nom: "",
+      cam_desc: "",
+      cam_lanza: "",
+      cam_mensaje: "",
+      cam_imagen: null,
+      cam_estatus: true,
     });
   };
 
@@ -186,14 +208,15 @@ const [minDate, setMinDate] = useState('');
   };
   //cierro peticiones a la api
   //efectos de modal
-  const seleccionarUsuario = (usuario, caso) => {
+  const seleccionarUsuario = async (usuario, caso) => {
     setnuevaCampana(usuario);
     caso === "Editar" ? abrirCerrarModalEditar() : abrirCerrarModalEliminar();
+    await Logotipo(usuario.cam_clave);
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      await peticionGetEmpresas();
+      await peticionGet();
       await peticionGetTipoCli();
     };
 
@@ -207,6 +230,7 @@ const [minDate, setMinDate] = useState('');
 
   const abrirCerrarModalEditar = () => {
     setModalEditar(!modalEditar);
+    setPreviewImage(null);
   };
 
   const abrirCerrarModalEliminar = () => {
@@ -216,7 +240,7 @@ const [minDate, setMinDate] = useState('');
   //construccion de modal
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
-
+    setImgCampana(selectedFile);
     if (selectedFile) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -257,22 +281,6 @@ const [minDate, setMinDate] = useState('');
             label="Descripcion"
             onChange={handleChange}
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="demo-simple-select">Empresa</InputLabel>
-            <Select
-              labelId="demo-simple-select"
-              id="demo-simple-select"
-              name="emp_clave"
-              onChange={handleChange}
-              label="Empresa"
-            >
-              {dataEmpresas.map((empresa) => (
-                <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
-                  {empresa.emp_nomcom}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <Box sx={{ margin: "auto", display: "flex" }}>
             <Typography>Fecha de Creacion: {currentDate}</Typography>
             <Typography sx={{ marginLeft: "23%" }}>
@@ -283,14 +291,17 @@ const [minDate, setMinDate] = useState('');
               type="date"
               id="fecha"
               min={minDate}
-              name="fin"
+              onChange={handleChange}
+              name="cam_lanza"
             />
           </Box>
           <TextField
             margin="normal"
             fullWidth
             id="outlined-multiline-static"
-            label="Multiline"
+            label="Mensaje"
+            name="cam_mensaje"
+            onChange={handleChange}
             multiline
             rows={3}
           />
@@ -311,8 +322,11 @@ const [minDate, setMinDate] = useState('');
             </Select>
           </FormControl>
           <Typography>Selecciona una imagen para tu campaña </Typography>
-          <span>*Se recomienda que la imagen no supere estas medidas (1920 x 1080)</span>
-          <br/><br/>
+          <span>
+            *Se recomienda que la imagen no supere estas medidas (1920 x 1080)
+          </span>
+          <br />
+          <br />
           <input
             style={{ margin: "auto" }}
             type="file"
@@ -320,7 +334,7 @@ const [minDate, setMinDate] = useState('');
             accept="image/png"
             onChange={handleImageChange}
           />
-          <Box sx={{display: "flex", marginTop: "10px"}}>
+          <Box sx={{ display: "flex", marginTop: "10px" }}>
             <Button
               variant="contained"
               sx={{ backgroundColor: "#084720", margin: "auto" }}
@@ -330,7 +344,7 @@ const [minDate, setMinDate] = useState('');
             </Button>
             <Button
               variant="contained"
-              sx={{ backgroundColor: "#084720" ,margin: "auto"}}
+              sx={{ backgroundColor: "#084720", margin: "auto" }}
               onClick={() => abrirCerrarModalInsertar()}
             >
               Cancelar
@@ -359,7 +373,7 @@ const [minDate, setMinDate] = useState('');
     <div
       style={{
         position: "absolute",
-        width: 500,
+        width: 1200,
         backgroundColor: "white",
         border: "2px solid #ccc",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
@@ -391,7 +405,7 @@ const [minDate, setMinDate] = useState('');
           onChange={handleChange}
           value={nuevaCampana && nuevaCampana.cam_desc}
         />
-        <br />
+        
         <FormControl fullWidth>
           <InputLabel id="demo-simple-select-dos">Tipo de Cliente</InputLabel>
           <Select
@@ -408,7 +422,16 @@ const [minDate, setMinDate] = useState('');
             ))}
           </Select>
         </FormControl>
+        </Box>
         <br />
+        <Typography>Actualmente tu logo de campaña es este:</Typography>
+        {imagenBlob && (
+          <img
+            src={URL.createObjectURL(imagenBlob)}
+            style={{ maxHeight: "200px", marginLeft: "10px" }}
+            alt="Logotipo de la empresa"
+          />
+        )}
         <Button
           variant="contained"
           sx={{ backgroundColor: "#084720" }}
@@ -423,7 +446,7 @@ const [minDate, setMinDate] = useState('');
         >
           Cancelar
         </Button>
-      </Box>
+    
     </div>
   );
 
@@ -469,100 +492,77 @@ const [minDate, setMinDate] = useState('');
       </Box>
     </div>
   );
-  //cierro construccion de modal
   return (
     <>
-   <TopBarSupervisor/>
-    <Grid container>
-      <Grid>
-      <SidebarCostum />
-      </Grid>
-      <Grid sx={{ width: "75%" }}>
-      <Box m="20px" sx={{ width: "100%" }}>
-        <Box sx={{ display: "flex" }}>
-          <Typography variant="h3">Campañas</Typography>
-          <Button onClick={() => abrirCerrarModalInsertar()}>
-            <AddCircleOutlineIcon fontSize="large" />
-          </Button>
-        </Box>
-        <Box sx={{ display: "flex", width: "40%" }}>
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select">Empresa</InputLabel>
-            <Select
-              labelId="demo-simple-select"
-              id="demo-simple-select"
-              name="empresa"
-              onChange={handleEmpresaChange}
-              label="Empresa"
-            >
-              {dataEmpresas.map((empresa) => (
-                <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
-                  {empresa.emp_nomcom}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "#084720" }}
-            onClick={() => peticionGet()}
-          >
-            Buscar
-          </Button>
-        </Box>
-        <br />
-        <br />
-        <TableContainer>
-          <Table sx={{ border: "2px solid #ccc" }}>
-            <TableHead sx={{ backgroundColor: "#084720" }}>
-              <TableRow>
-                <TableCell sx={{ color: "#fff" }}>Clave</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Nombre</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Lanzamiento</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.map((consola) => (
-                <TableRow key={consola.cam_clave}>
-                  <TableCell>{consola.cam_clave}</TableCell>
-                  <TableCell>{consola.cam_nom}</TableCell>
+      <TopBar />
+      <Grid container>
+        <Grid>
+          <SidebarCostumEmpresa selectedItem="Campañas" />
+        </Grid>
+        <Grid sx={{ width: "85%" }}>
+          <Box m="20px" sx={{ width: "100%" }}>
+            <Box sx={{ display: "flex" }}>
+              <Typography variant="h3">Campañas</Typography>
+              <Button onClick={() => abrirCerrarModalInsertar()}>
+                <AddCircleOutlineIcon fontSize="large" />
+              </Button>
+            </Box>
+            <TableContainer>
+              <Table sx={{ border: "2px solid #ccc" }}>
+                <TableHead sx={{ backgroundColor: "#084720" }}>
+                  <TableRow>
+                    <TableCell sx={{ color: "#fff" }}>Clave</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Nombre</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Lanzamiento</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {data.map((consola) => (
+                    <TableRow key={consola.cam_clave}>
+                      <TableCell>{consola.cam_clave}</TableCell>
+                      <TableCell>{consola.cam_nom}</TableCell>
 
-                  <TableCell>{consola.cam_lanza}</TableCell>
-                  <TableCell>{consola.tip_nom}</TableCell>
-                  <TableCell>
-                    <EditIcon
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => seleccionarUsuario(consola, "Editar")}
-                    />
-                    &nbsp;
-                    <DeleteIcon
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => seleccionarUsuario(consola, "Eliminar")}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Modal open={modalInsertar} onClose={() => abrirCerrarModalInsertar()}>
-          {bodyInsertar}
-        </Modal>
-        <Modal open={modalEditar} onClose={() => abrirCerrarModalEditar()}>
-          {bodyEditar}
-        </Modal>
-      </Box>
-      <Modal open={modalEliminar} onClose={() => abrirCerrarModalEliminar()}>
-        {bodyEliminar}
-      </Modal>
+                      <TableCell>{consola.cam_lanza}</TableCell>
+                      <TableCell>{consola.tip_nom}</TableCell>
+                      <TableCell>
+                        <EditIcon
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => seleccionarUsuario(consola, "Editar")}
+                        />
+                        &nbsp;
+                        <DeleteIcon
+                          sx={{ cursor: "pointer" }}
+                          onClick={() =>
+                            seleccionarUsuario(consola, "Eliminar")
+                          }
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Modal
+              open={modalInsertar}
+              onClose={() => abrirCerrarModalInsertar()}
+            >
+              {bodyInsertar}
+            </Modal>
+            <Modal open={modalEditar} onClose={() => abrirCerrarModalEditar()}>
+              {bodyEditar}
+            </Modal>
+            <Modal
+              open={modalEliminar}
+              onClose={() => abrirCerrarModalEliminar()}
+            >
+              {bodyEliminar}
+            </Modal>
+          </Box>
+        </Grid>
       </Grid>
-    </Grid>
-      
-      
     </>
   );
 };
-
-export default Campanas;
+export default CampanaEmpresa;

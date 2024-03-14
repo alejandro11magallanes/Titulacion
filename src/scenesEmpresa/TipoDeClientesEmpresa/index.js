@@ -12,11 +12,7 @@ import {
   Button,
   Modal,
   TextField,
-  Select,
-  InputLabel,
-  MenuItem,
   Grid,
-  FormControl,
 } from "@mui/material";
 import SidebarCostumEmpresa from "../../scenes/global/SidebarEmpresa";
 import TopBar from "../../scenes/global/TopBar";
@@ -24,73 +20,49 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import apiUrl from "../../apiConfig";
-const baseUrlPost = `${apiUrl}/agregarUsuario`;
-const baseUrlPut = `${apiUrl}/editarUsuario/`;
-const baseUrlDelete = `${apiUrl}/eliminarUsuario/`;
-const baseUrlBuscarEmpresa = `${apiUrl}/EmpUsu`;
 
-const UsuariosEmpresa = () => {
+const baseUrlPost = `${apiUrl}/agregarTipoCli`;
+const baseUrlPut = `${apiUrl}/editarTipoCli/`;
+const baseUrlDelete = `${apiUrl}/eliminarTipoCli/`;
+const baseUrlBuscarEmpresa = `${apiUrl}/EmpTipCli`;
+
+const TiposDeClienteEmpresa = () => {
   const [data, setData] = useState([]);
   const empresaUsuario = localStorage.getItem("empresa");
-  const [dataEmpresas, setDataEmpresas] = useState([]);
   const [modalInsertar, setModalInsertar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
-  const [modalEliminar, setModalEliminar] = useState(false);
-  const [selectedEmpresa, setSelectedEmpresa] = useState({
+  const [selectedEmpresa] = useState({
     empresa: empresaUsuario,
   });
-  //seteo de entidad
-  const [nuevaUsuario, setnuevoUsuario] = useState({
-    emp_clave: empresaUsuario,
-    usu_correo: "",
-    usu_nombre: "",
-    usu_contra: "",
-    usu_tipo: "3",
-  });
 
+  const [modalEliminar, setModalEliminar] = useState(false);
+  //seteo de entidad
+  const [nuevoTipoUsuario, setnuevoTipoUsuario] = useState({
+    emp_clave: empresaUsuario,
+    tip_nom: "",
+    tip_desc: "",
+  });
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setnuevoUsuario((prevState) => ({
+    setnuevoTipoUsuario((prevState) => ({
       ...prevState,
       [name]: value,
     }));
-  
   };
 
   const validateForm = () => {
     const errors = {};
-    if (!nuevaUsuario.usu_nombre) {
-      errors.usu_nombre = "El nombre es requerido";
-    } else if (!validarNombre(nuevaUsuario.usu_nombre)) {
-      errors.usu_nombre = "El nombre debe tener minimo 8 caracteres";
+    if (!nuevoTipoUsuario.tip_nom) {
+      errors.tip_nom = "El nombre es requerido";
     }
-    if (!nuevaUsuario.usu_correo) {
-      errors.usu_correo = "El correo es requerido";
-    } else if (!isValidEmail(nuevaUsuario.usu_correo)) {
-      errors.usu_correo = "El correo electrónico no es válido";
-    }
-    if (!nuevaUsuario.usu_contra) {
-      errors.usu_contra = "La contraseña es requerida";
-    } else if (!validarContra(nuevaUsuario.usu_contra)) {
-      errors.usu_contra = "La contraseña debe tener minimo 6 caracteres";
-    }
-
-    // Puedes agregar más validaciones aquí según tus necesidades
+    if (!nuevoTipoUsuario.tip_desc) {
+      errors.tip_desc = "La descripción es requerida";
+    } 
     return errors;
   };
-  const isValidEmail = (email) => {
-    // Expresión regular para validar el formato de un correo electrónico
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-  const validarNombre = (nombre) => {
-    // Verificar que el nombre tenga al menos 8 caracteres
-    return nombre.length >= 8;
-  };
-  const validarContra = (password) => {
-    // Verificar que el nombre tenga al menos 8 caracteres
-    return password.length >= 6;
-  };
+ 
+
+
   const peticionGet = async () => {
     const token = localStorage.getItem("token");
 
@@ -105,31 +77,29 @@ const UsuariosEmpresa = () => {
         setData(response.data.result);
       });
   };
-
   const peticionPost = async () => {
     const errors = validateForm();
     if (Object.keys(errors).length === 0) {
-      const token = localStorage.getItem("token"); // Obtener el token de localStorage
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
-        },
-      };
-      await axios.post(baseUrlPost, nuevaUsuario, config).then((response) => {
-        setData(data.concat(response.data.result));
-        abrirCerrarModalInsertar();
-        setnuevoUsuario({
-          emp_clave: empresaUsuario,
-          usu_correo: "",
-          usu_nombre: "",
-          usu_contra: "",
-          usu_tipo: "3",
-        });
-      });
-    } else {
-      alert(Object.values(errors).join("\n"));
+    const token = localStorage.getItem("token"); // Obtener el token de localStorage
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
+      },
+    };
+    await axios.post(baseUrlPost, nuevoTipoUsuario, config).then((response) => {
+      setData(data.concat(response.data.result));
+      abrirCerrarModalInsertar();
+      setnuevoTipoUsuario({
+        emp_clave: empresaUsuario,
+        tip_nom: "",
+        tip_desc: "",
+      })
+    });}
+    else{
+        alert(Object.values(errors).join("\n"));
     }
   };
+
   const peticionPut = async () => {
     const errors = validateForm();
     if (Object.keys(errors).length === 0) {
@@ -140,33 +110,29 @@ const UsuariosEmpresa = () => {
       },
     };
     await axios
-      .put(baseUrlPut + nuevaUsuario.usu_numctrl, nuevaUsuario, config)
+      .put(baseUrlPut + nuevoTipoUsuario.tip_clave, nuevoTipoUsuario, config)
       .then((response) => {
         var dataNueva = data;
         dataNueva.map((consola) => {
-          if (nuevaUsuario.usu_numctrl === consola.usu_numctrl) {
-            consola.usu_nombre = nuevaUsuario.usu_nombre;
-            consola.usu_correo = nuevaUsuario.usu_correo;
-            consola.usu_contra = nuevaUsuario.usu_contra;
+          if (nuevoTipoUsuario.tip_clave === consola.tip_clave) {
+            consola.tip_nom = nuevoTipoUsuario.tip_nom;
+            consola.tip_desc = nuevoTipoUsuario.tip_desc;
           }
         });
         setData(dataNueva);
         abrirCerrarModalEditar();
-        setnuevoUsuario({
-          emp_clave: empresaUsuario,
-          usu_correo: "",
-          usu_nombre: "",
-          usu_contra: "",
-          usu_tipo: "3",
-        });
-      });
-    }else {
-      alert(Object.values(errors).join("\n"));
-    }
+        setnuevoTipoUsuario({
+            emp_clave: empresaUsuario,
+            tip_nom: "",
+            tip_desc: "",
+          })
+      });}
+      else{
+        alert(Object.values(errors).join("\n"));
+      }
   };
 
   const peticionDelete = async () => {
-    
     const token = localStorage.getItem("token"); // Obtener el token de localStorage
     const config = {
       headers: {
@@ -174,27 +140,25 @@ const UsuariosEmpresa = () => {
       },
     };
     await axios
-      .delete(baseUrlDelete + nuevaUsuario.usu_numctrl, config)
+      .delete(baseUrlDelete + nuevoTipoUsuario.tip_clave, config)
       .then((response) => {
         setData(
           data.filter(
-            (consola) => consola.usu_numctrl !== nuevaUsuario.usu_numctrl
+            (consola) => consola.tip_clave !== nuevoTipoUsuario.tip_clave
           )
         );
         abrirCerrarModalEliminar();
-        setnuevoUsuario({
-          emp_clave: empresaUsuario,
-          usu_correo: "",
-          usu_nombre: "",
-          usu_contra: "",
-          usu_tipo: "3",
-        });
+        setnuevoTipoUsuario({
+            emp_clave: empresaUsuario,
+            tip_nom: "",
+            tip_desc: "",
+          })
       });
-      
   };
-
-  const seleccionarUsuario = (usuario, caso) => {
-    setnuevoUsuario(usuario);
+  //cierro peticiones a la api
+  //efectos de modal
+  const seleccionarSucursal = (sucursal, caso) => {
+    setnuevoTipoUsuario(sucursal);
     caso === "Editar" ? abrirCerrarModalEditar() : abrirCerrarModalEliminar();
   };
 
@@ -204,7 +168,7 @@ const UsuariosEmpresa = () => {
     };
 
     fetchData();
-  }, []);
+  });
 
   const abrirCerrarModalInsertar = () => {
     setModalInsertar(!modalInsertar);
@@ -217,12 +181,14 @@ const UsuariosEmpresa = () => {
   const abrirCerrarModalEliminar = () => {
     setModalEliminar(!modalEliminar);
   };
+  //cierro efectos de modal
+  //construccion de modal
 
   const bodyInsertar = (
     <div
       style={{
         position: "absolute",
-        width: 750,
+        width: 500,
         backgroundColor: "white",
         border: "2px solid #ccc",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
@@ -238,27 +204,18 @@ const UsuariosEmpresa = () => {
           "& > :not(style)": { m: 1, width: "25ch" },
         }}
       >
-        <h3>Agregar un Nuevo Usuario Empleado</h3>
+        <h3>Agregar Tipo de Cliente</h3>
         <TextField
           margin="normal"
-          name="usu_correo"
-          label="Correo"
-          onChange={handleChange}
-          autoComplete="off"
-        />
-        <TextField
-          margin="normal"
-          name="usu_nombre"
+          name="tip_nom"
           label="Nombre"
           onChange={handleChange}
-          autoComplete="off"
         />
         <TextField
           margin="normal"
-          name="usu_contra"
-          label="Contraseña"
+          name="tip_desc"
+          label="Descripcion"
           onChange={handleChange}
-          autoComplete="off"
         />
         <Button
           variant="contained"
@@ -282,7 +239,7 @@ const UsuariosEmpresa = () => {
     <div
       style={{
         position: "absolute",
-        width: 750,
+        width: 500,
         backgroundColor: "white",
         border: "2px solid #ccc",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
@@ -298,29 +255,21 @@ const UsuariosEmpresa = () => {
           "& > :not(style)": { m: 1, width: "25ch" },
         }}
       >
-        <h3>Editar Usuario</h3>
+        <h3>Editar Tipo de Cliente</h3>
         <TextField
           margin="normal"
-          name="usu_correo"
-          label="Correo"
-          onChange={handleChange}
-          value={nuevaUsuario && nuevaUsuario.usu_correo}
-        />
-        <TextField
-          margin="normal"
-          name="usu_nombre"
+          name="tip_nom"
           label="Nombre"
           onChange={handleChange}
-          value={nuevaUsuario && nuevaUsuario.usu_nombre}
+          value={nuevoTipoUsuario && nuevoTipoUsuario.tip_nom}
         />
         <TextField
           margin="normal"
-          name="usu_contra"
-          label="Contraseña"
+          name="tip_desc"
+          label="Descuento"
           onChange={handleChange}
-          value={nuevaUsuario && nuevaUsuario.usu_contra}
+          value={nuevoTipoUsuario && nuevoTipoUsuario.tip_desc}
         />
-        
         <Button
           variant="contained"
           sx={{ backgroundColor: "#084720" }}
@@ -356,11 +305,13 @@ const UsuariosEmpresa = () => {
     >
       <Box
         m="10px"
-        
+        sx={{
+          "& > :not(style)": { m: 1, width: "25ch" },
+        }}
       >
         <p>
-          Estás seguro que deseas eliminar al Usuario{" "}
-          <b>{nuevaUsuario && nuevaUsuario.usu_nombre}</b> ?{" "}
+          Estás seguro que deseas eliminar el Tipo de Cliente{" "}
+          <b>{nuevoTipoUsuario && nuevoTipoUsuario.tip_nom}</b> ?{" "}
         </p>
         <Button
           variant="contained"
@@ -371,7 +322,7 @@ const UsuariosEmpresa = () => {
         </Button>
         <Button
           variant="contained"
-          sx={{ backgroundColor: "#084720", marginLeft: "10%" }}
+          sx={{ backgroundColor: "#084720" }}
           onClick={() => abrirCerrarModalEliminar()}
         >
           Cancelar
@@ -379,18 +330,18 @@ const UsuariosEmpresa = () => {
       </Box>
     </div>
   );
-
+  //cierro construccion de modal
   return (
     <>
       <TopBar />
       <Grid container>
         <Grid>
-          <SidebarCostumEmpresa selectedItem="Usuarios" />
+          <SidebarCostumEmpresa selectedItem="Tipos de Cliente" />
         </Grid>
         <Grid sx={{ width: "90%" }}>
           <Box m="20px" sx={{ width: "100%" }}>
             <Box sx={{ display: "flex" }}>
-              <Typography variant="h4">Usuarios</Typography>
+              <Typography variant="h4">Tipos de Clientes</Typography>
               <Button onClick={() => abrirCerrarModalInsertar()}>
                 <AddCircleOutlineIcon fontSize="large" />
               </Button>
@@ -400,30 +351,26 @@ const UsuariosEmpresa = () => {
               <Table sx={{ border: "2px solid #ccc" }}>
                 <TableHead sx={{ backgroundColor: "#084720" }}>
                   <TableRow>
-                    <TableCell sx={{ color: "#fff" }}>Correo</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Clave</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Nombre</TableCell>
-                    <TableCell sx={{ color: "#fff" }}>Contraseña</TableCell>
-                    <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {data.map((consola) => (
-                    <TableRow key={consola.usu_numctrl}>
-                      <TableCell>{consola.usu_correo}</TableCell>
-                      <TableCell>{consola.usu_nombre}</TableCell>
-                      <TableCell>{consola.usu_contra}</TableCell>
-                      <TableCell>{consola.usu_tipo}</TableCell>
+                    <TableRow key={consola.tip_clave}>
+                      <TableCell>{consola.tip_clave}</TableCell>
+                      <TableCell>{consola.tip_nom}</TableCell>
                       <TableCell>
                         <EditIcon
                           sx={{ cursor: "pointer" }}
-                          onClick={() => seleccionarUsuario(consola, "Editar")}
+                          onClick={() => seleccionarSucursal(consola, "Editar")}
                         />
                         &nbsp;
                         <DeleteIcon
                           sx={{ cursor: "pointer" }}
                           onClick={() =>
-                            seleccionarUsuario(consola, "Eliminar")
+                            seleccionarSucursal(consola, "Eliminar")
                           }
                         />
                       </TableCell>
@@ -453,4 +400,4 @@ const UsuariosEmpresa = () => {
     </>
   );
 };
-export default UsuariosEmpresa;
+export default TiposDeClienteEmpresa;

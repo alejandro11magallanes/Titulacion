@@ -1,45 +1,37 @@
 import React, { useEffect, useState } from "react";
+import {  Box,
+    Typography,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    TableContainer,
+    Button,
+    Modal,
+    TextField,
+    Grid,} from "@mui/material";
+import SidebarCostumEmpresa from "../../scenes/global/SidebarEmpresa";
+import TopBar from "../../scenes/global/TopBar";
 import axios from "axios";
-import SidebarCostum from "../global/Sidebar";
-import TopBarSupervisor from "../global/TopBarSupervisor";
-
-import {
-  Box,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableContainer,
-  Button,
-  Modal,
-  TextField,
-  Grid,
-} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import apiUrl from "../../apiConfig";
-//url de las apis
-const baseUrl = `${apiUrl}/verEmpresa`;
-const baseUrlPost = `${apiUrl}/agregarEmpresa`;
-const baseUrlPut = `${apiUrl}/editarEmpresa/`;
-const baseUrlDelete = `${apiUrl}/eliminarEmpresa/`;
 const ImagenEmpresa = `${apiUrl}/traerImg`;
+const baseUrlPut = `${apiUrl}/editarEmpresa/`;
+const baseUrl = `${apiUrl}/Empresa`;
 
-const Empresas = () => {
-  //declaraciones de useState
-  const [data, setData] = useState([]);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [modalInsertar, setModalInsertar] = useState(false);
-  const [imgEmpresa, setImgEmpresa] = useState(null);
+const EmpresaIndividual = () => {
+    const [data, setData] = useState([]);
+    const [previewImage, setPreviewImage] = useState(null);
+    const empresaUsuario = localStorage.getItem("empresa");
+    const [selectedEmpresa] = useState({
+      empresa: empresaUsuario,
+    });
+    const [imgEmpresa, setImgEmpresa] = useState(null);
   const [modalEditar, setModalEditar] = useState(false);
-  const [modalEliminar, setModalEliminar] = useState(false);
   const [imagenBlob, setImagenBlob] = useState(null);
-  //seteo de entidad
   const [nuevaEpresa, setnuevaEmpresa] = useState({
-    emp_nomcom: "",
+    emp_nomcom: empresaUsuario,
     emp_razon: "",
     emp_cp: "",
     emp_calle: "",
@@ -52,10 +44,10 @@ const Empresas = () => {
     emp_status: 1,
     emp_logo: null,
   });
-  //cierro seteo de entidad
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
     setImgEmpresa(selectedFile);
+    console.log(imgEmpresa);
     if (selectedFile) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -73,9 +65,6 @@ const Empresas = () => {
     }));
   };
 
-  //cierro construccion de entidad
-
-  //Peticiones a la api
   const Logotipo = async (emp_clave) => {
     const token = localStorage.getItem("token");
 
@@ -100,7 +89,7 @@ const Empresas = () => {
         Authorization: `Bearer ${token}`,
       },
     };
-    await axios.get(baseUrl, config).then((response) => {
+    await axios.post(baseUrl,selectedEmpresa, config).then((response) => {
       setData(response.data.result);
     });
   };
@@ -131,37 +120,6 @@ const Empresas = () => {
     }
     // Puedes agregar más validaciones aquí según tus necesidades
     return errors;
-  };
-
-  const peticionPost = async () => {
-    const errors = validateForm();
-    if (Object.keys(errors).length === 0) {
-      const token = localStorage.getItem("token"); // Obtener el token de localStorage
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
-        },
-      };
-      const formData = new FormData();
-      formData.append("emp_logo", imgEmpresa);
-      formData.append("emp_nomcom", nuevaEpresa.emp_nomcom);
-      formData.append("emp_razon", nuevaEpresa.emp_razon);
-      formData.append("emp_cp", nuevaEpresa.emp_cp);
-      formData.append("emp_calle", nuevaEpresa.emp_calle);
-      formData.append("emp_cd", nuevaEpresa.emp_cd);
-      formData.append("emp_conta1", nuevaEpresa.emp_conta1);
-      formData.append("emp_cel1", nuevaEpresa.emp_cel1);
-      formData.append("emp_conta2", nuevaEpresa.emp_conta2);
-      formData.append("emp_cel2", nuevaEpresa.emp_cel2);
-      formData.append("emp_col", nuevaEpresa.emp_col);
-      console.log(formData);
-      await axios.post(baseUrlPost, formData, config).then((response) => {
-        setData(data.concat(response.data.result));
-        abrirCerrarModalInsertar();
-      });
-    } else {
-      alert(Object.values(errors).join("\n"));
-    }
   };
 
   const peticionPut = async () => {
@@ -212,184 +170,23 @@ const Empresas = () => {
       });
   };
 
-  const peticionDelete = async () => {
-    const token = localStorage.getItem("token"); // Obtener el token de localStorage
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
-      },
-    };
-    await axios
-      .delete(baseUrlDelete + nuevaEpresa.emp_clave, config)
-      .then((response) => {
-        setData(
-          data.filter((consola) => consola.emp_clave !== nuevaEpresa.emp_clave)
-        );
-        abrirCerrarModalEliminar();
-      });
-  };
-  //cierro peticiones a la api
-
-  //efectos de modal
-  const seleccionarEmpresa = async (empresa, caso) => {
-    setnuevaEmpresa(empresa);
-    caso === "Editar" ? abrirCerrarModalEditar() : abrirCerrarModalEliminar();
-    await Logotipo(empresa.emp_clave);
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       await peticionGet();
     };
 
     fetchData();
-  }, []);
-
-  const abrirCerrarModalInsertar = () => {
-    setModalInsertar(!modalInsertar);
-    setPreviewImage(null);
-  };
+  });
 
   const abrirCerrarModalEditar = () => {
     setModalEditar(!modalEditar);
     setPreviewImage(null);
   };
-
-  const abrirCerrarModalEliminar = () => {
-    setModalEliminar(!modalEliminar);
+  const seleccionarEmpresa = async (empresa, caso) => {
+    setnuevaEmpresa(empresa);
+    (caso === "Editar")&&setModalEditar(true);
+    await Logotipo(empresa.emp_clave);
   };
-
-  //cierro efectos de modal
-
-  //construccion de modal
-
-  const bodyInsertar = (
-    <div
-      style={{
-        position: "absolute",
-        width: 1200,
-        backgroundColor: "white",
-        border: "2px solid #ccc",
-        boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
-        padding: "10px",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-      }}
-    >
-      <Box
-        m="10px"
-        sx={{
-          "& > :not(style)": { m: 1, width: "25ch" },
-          "& > :not(style) > :not(style)": { width: "100%" },
-        }}
-      >
-        <h3>Agregar Nueva Empresa</h3>
-        <TextField
-          margin="normal"
-          name="emp_nomcom"
-          label="Nombre"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_razon"
-          label="Razón"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_cp"
-          label="Codigo Postal"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_calle"
-          label="Calle"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_col"
-          label="Colonia"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_cd"
-          label="Ciudad"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_conta1"
-          label="Contacto 1"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_cel1"
-          label="Telefono 1"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_conta2"
-          label="Contacto 2"
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          name="emp_cel2"
-          label="Telefono 2"
-          onChange={handleChange}
-        />
-      </Box>
-      <Box m="20px">
-        <Typography sx={{ width: "100%" }} variant="h6">
-          Sube el logo de la empresa
-        </Typography>
-        <br />
-        <span>
-          *Si no subes una imagen por defecto se subira una imagen generica
-        </span>
-        <br />
-        <br />
-        <Box>
-          <input type="file" accept="image/png" onChange={handleImageChange} />
-          {previewImage && (
-            <img
-              src={previewImage}
-              alt="Preview"
-              style={{
-                maxWidth: "100px",
-                maxHeight: "100px",
-                marginLeft: "100px",
-              }}
-            />
-          )}
-        </Box>
-        <Box sx={{ marginTop: "20px" }}>
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "#084720" }}
-            onClick={() => peticionPost()}
-          >
-            Insertar
-          </Button>
-
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "#084720", marginLeft: "50px" }}
-            onClick={() => abrirCerrarModalInsertar()}
-          >
-            Cancelar
-          </Button>
-        </Box>
-      </Box>
-    </div>
-  );
 
   const bodyEditar = (
     <div
@@ -538,69 +335,16 @@ const Empresas = () => {
      
     </div>
   );
-
-  const bodyEliminar = (
-    <div
-      div
-      style={{
-        position: "absolute",
-        width: 500,
-        backgroundColor: "white",
-        border: "2px solid #ccc",
-        boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
-        padding: "10px",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-      }}
-    >
-      <Box
-        m="10px"
-        sx={{
-          "& > :not(style)": { m: 1, width: "25ch" },
-        }}
-      >
-        <p>
-          Estás seguro que deseas eliminar la empresa{" "}
-          <b>{nuevaEpresa && nuevaEpresa.emp_nomcom}</b> ?{" "}
-        </p>
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#084720" }}
-          onClick={() => peticionDelete()}
-        >
-          Si
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#084720" }}
-          onClick={() => abrirCerrarModalEliminar()}
-        >
-          Cancelar
-        </Button>
-      </Box>
-    </div>
-  );
-  //cierro construccion de modal
-
-  //renderizado
-
   return (
     <>
-      <TopBarSupervisor />
+    <TopBar/>
       <Grid container>
         <Grid>
-          <SidebarCostum />
+          <SidebarCostumEmpresa selectedItem="Empresa" />
         </Grid>
         <Grid sx={{ width: "75%" }}>
           <Box m="20px" sx={{ width: "100%" }}>
-            <Box sx={{ display: "flex" }}>
-              <Typography variant="h3">Empresas</Typography>
-              <Button onClick={() => abrirCerrarModalInsertar()}>
-                <AddCircleOutlineIcon fontSize="large" />
-              </Button>
-            </Box>
-            <TableContainer>
+          <TableContainer>
               <Table sx={{ border: "2px solid #ccc" }}>
                 <TableHead sx={{ backgroundColor: "#084720" }}>
                   <TableRow>
@@ -621,14 +365,8 @@ const Empresas = () => {
                       <TableCell>
                         <EditIcon
                           sx={{ cursor: "pointer" }}
-                          onClick={() => seleccionarEmpresa(consola, "Editar")}
-                        />
-                        &nbsp;
-                        <DeleteIcon
-                          sx={{ cursor: "pointer" }}
                           onClick={() =>
-                            seleccionarEmpresa(consola, "Eliminar")
-                          }
+                            seleccionarEmpresa(consola, "Editar")}
                         />
                       </TableCell>
                     </TableRow>
@@ -636,20 +374,8 @@ const Empresas = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Modal
-              open={modalInsertar}
-              onClose={() => abrirCerrarModalInsertar()}
-            >
-              {bodyInsertar}
-            </Modal>
             <Modal open={modalEditar} onClose={() => abrirCerrarModalEditar()}>
               {bodyEditar}
-            </Modal>
-            <Modal
-              open={modalEliminar}
-              onClose={() => abrirCerrarModalEliminar()}
-            >
-              {bodyEliminar}
             </Modal>
           </Box>
         </Grid>
@@ -657,5 +383,4 @@ const Empresas = () => {
     </>
   );
 };
-
-export default Empresas;
+export default EmpresaIndividual;

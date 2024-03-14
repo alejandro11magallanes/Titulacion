@@ -6,6 +6,7 @@ import { Button, Typography, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoginImg from "../../images/login.png";
+import LoginLogo from "../../images/logolink.PNG";
 import apiUrl from "../../apiConfig";
 const Login = () => {
   //logica
@@ -49,7 +50,9 @@ const Login = () => {
           localStorage.setItem("id", id);
           localStorage.setItem("empresa", empresa);
           localStorage.setItem("nombreEmpresa", empresaNombre);
-          navigate("/dashboard", { state: { rol, nombre: nombre } });
+          window.location.reload();
+          window.location.href = '/dashboard';
+          
         } else if (response.data.status === 403) {
           setError("Credenciales inválidas");
         }
@@ -85,9 +88,7 @@ const Login = () => {
               padding={3}
 
             >
-              <Typography variant="h4" padding={3} textAlign={"left"}>
-                Login
-              </Typography>
+              <img src={LoginLogo} alt="logo"/>
               <TextField
                 margin="normal"
                 type="text"
