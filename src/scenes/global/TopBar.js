@@ -1,6 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import BarLogo from "../../images/logolink.PNG";
 import axios from "axios";
 import apiUrl from "../../apiConfig";
@@ -22,9 +21,16 @@ const TopBar = () => {
         Authorization: `Bearer ${token}`,
       },
     };
-    await axios.post(UrlTLogout, {}, config).then((response) => {
-      localStorage.clear();
-    });
+    try{
+      await axios.post(UrlTLogout, {}, config).then((response) => {
+        localStorage.clear();
+      });
+    }
+   catch(error){
+    console.log(error)
+    localStorage.clear();
+    window.location.href = '/';
+   }
   }
   const Logotipo = async () => {
     const token = localStorage.getItem("token");
@@ -35,12 +41,18 @@ const TopBar = () => {
       },
       responseType: "blob",
     };
-    await axios
+    try{
+      await axios
       .post(ImagenEmpresa, { empresa: emp }, config)
       .then((response) => {
         setImagenBlob(response.data);
        
       });
+    }
+    catch(error){
+      console.log("hay este error:", error);
+    }
+    
   };
 
   useEffect(() => {
@@ -51,7 +63,7 @@ const TopBar = () => {
     fetchData();
   }, []);
 
-  const navigate = useNavigate();
+
   const Logout = () => {
     CerrarSesion();
     window.location.href = '/';

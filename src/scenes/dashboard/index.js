@@ -6,6 +6,7 @@ import { Box, Grid } from "@mui/material";
 import SelectSucursal from "../../scenesEmpleado/SelectSucursal";
 import TopBar from "../global/TopBar";
 import TopBarSupervisor from "../global/TopBarSupervisor";
+import Graficos from "../../scenesEmpresa/Graficos";
 
 const Dashboard = () => {
 
@@ -20,7 +21,7 @@ const Dashboard = () => {
           </Grid>
 
           <Grid item >
-            <Box m="50px">
+            <Box m="20px">
               
             </Box>
           </Grid>
@@ -35,11 +36,9 @@ const Dashboard = () => {
           <Grid >
             <SidebarCostumEmpresa selectedItem="Inicio" />
           </Grid>
-          <Grid >
-            <Box m="50px">
-              <Typography variant="h4">
-             
-              </Typography>
+          <Grid sx={{width: "90%"}}>
+            <Box m="20px">
+              <Graficos/>
             </Box>
           </Grid>
         </Grid>
