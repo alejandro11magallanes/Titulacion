@@ -210,7 +210,7 @@ const CampanaEmpresa = () => {
   //efectos de modal
   const seleccionarUsuario = async (usuario, caso) => {
     setnuevaCampana(usuario);
-    caso === "Editar" ? abrirCerrarModalEditar() : abrirCerrarModalEliminar();
+    caso === "Editar" && setModalEditar(true);
     await Logotipo(usuario.cam_clave);
   };
 
@@ -373,7 +373,7 @@ const CampanaEmpresa = () => {
     <div
       style={{
         position: "absolute",
-        width: 1200,
+        width: 700,
         backgroundColor: "white",
         border: "2px solid #ccc",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
@@ -402,51 +402,44 @@ const CampanaEmpresa = () => {
           margin="normal"
           name="cam_desc"
           label="Descripcion"
+          fullWidth
           onChange={handleChange}
           value={nuevaCampana && nuevaCampana.cam_desc}
         />
+        <Typography>Lanzamiento: {nuevaCampana.cam_lanza}</Typography>
+      </Box>
+      <br />
+      <Grid container>
+        <Grid md={6}>
+          <Typography>Actualmente tu logo de campaña es este:</Typography>
+          {imagenBlob && (
+            <img
+              src={URL.createObjectURL(imagenBlob)}
+              style={{ maxHeight: "200px", marginLeft: "50px" }}
+              alt="Logotipo de la empresa"
+            />
+          )}
+        </Grid>
+        <Grid md={6}>
+        <Typography>¿Deseas Modificarlo?</Typography>
         
-        <FormControl fullWidth>
-          <InputLabel id="demo-simple-select-dos">Tipo de Cliente</InputLabel>
-          <Select
-            labelId="demo-simple-select-dos"
-            id="demo-simple-select-dos"
-            name="tip_clave"
-            onChange={handleChange}
-            label="Tipo de Cliente"
-          >
-            {dataTipoCli.map((tipo) => (
-              <MenuItem key={tipo.tip_clave} value={tipo.tip_clave}>
-                {tipo.tip_nom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        </Box>
-        <br />
-        <Typography>Actualmente tu logo de campaña es este:</Typography>
-        {imagenBlob && (
-          <img
-            src={URL.createObjectURL(imagenBlob)}
-            style={{ maxHeight: "200px", marginLeft: "10px" }}
-            alt="Logotipo de la empresa"
-          />
-        )}
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#084720" }}
-          onClick={() => peticionPut()}
-        >
-          Editar
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#084720" }}
-          onClick={() => abrirCerrarModalEditar()}
-        >
-          Cancelar
-        </Button>
-    
+        </Grid>
+      </Grid>
+
+      <Button
+        variant="contained"
+        sx={{ backgroundColor: "#084720" }}
+        onClick={() => peticionPut()}
+      >
+        Editar
+      </Button>
+      <Button
+        variant="contained"
+        sx={{ backgroundColor: "#084720" }}
+        onClick={() => abrirCerrarModalEditar()}
+      >
+        Cancelar
+      </Button>
     </div>
   );
 
@@ -530,13 +523,6 @@ const CampanaEmpresa = () => {
                         <EditIcon
                           sx={{ cursor: "pointer" }}
                           onClick={() => seleccionarUsuario(consola, "Editar")}
-                        />
-                        &nbsp;
-                        <DeleteIcon
-                          sx={{ cursor: "pointer" }}
-                          onClick={() =>
-                            seleccionarUsuario(consola, "Eliminar")
-                          }
                         />
                       </TableCell>
                     </TableRow>

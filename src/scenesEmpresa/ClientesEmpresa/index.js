@@ -199,21 +199,21 @@ const ClientesEmpresa = () => {
   };
 
   const peticionPut = async () => {
-  
+
     const token = localStorage.getItem("token"); // Obtener el token de localStorage
     const config = {
       headers: {
         Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
       },
     };
-    await axios
+    try{
+      await axios
       .put(baseUrlPut + nuevoCliente.cli_clave, nuevoCliente, config)
       .then((response) => {
         var dataNueva = data;
         dataNueva.map((consola) => {
           if (nuevoCliente.cli_clave === consola.cli_clave) {
             consola.cli_nomcom = nuevoCliente.cli_nomcom;
-            consola.tip_clave = nuevoCliente.tip_clave;
             consola.cli_cel = nuevoCliente.cli_cel;
             consola.cli_correo = nuevoCliente.cli_correo;
           }
@@ -231,6 +231,13 @@ const ClientesEmpresa = () => {
             suc_clave: "",
           });
       });
+      abrirCerrarModalEditar();
+    }
+    catch(error){
+      console.log(error);
+      abrirCerrarModalEditar();
+    }
+   
   };
 
   const peticionDelete = async () => {
@@ -277,8 +284,16 @@ const ClientesEmpresa = () => {
   const abrirCerrarModalInsertar = () => {
     setModalInsertar(!modalInsertar);
   };
+  const seleccionarUsuario =  (usuario, caso) => {
+    setnuevoCliente(usuario);
+    (caso === "Editar")&&setModalEditar(true);
+ 
+  };
+  const abrirCerrarModalEditar = () => {
+    setModalEditar(!modalEditar);
+ 
+  };
 
-  
   //cierro efectos de modal
   //construccion de modal
 
@@ -391,6 +406,68 @@ const ClientesEmpresa = () => {
     </div>
   );
 
+  const bodyEditar = (
+    <div
+      style={{
+        position: "absolute",
+        width: 500,
+        backgroundColor: "white",
+        border: "2px solid #ccc",
+        boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
+        padding: "10px",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+      }}
+    >
+      <Box
+        m="10px"
+        sx={{
+          "& > :not(style)": { m: 1, width: "25ch" },
+        }}
+      >
+        <h3>Edita al Cliente Cliente</h3>
+
+        <TextField
+          margin="normal"
+          name="cli_nomcom"
+          label="Nombre"
+          onChange={handleChange}
+          value={nuevoCliente && nuevoCliente.cli_nomcom}
+        />
+        <TextField
+          margin="normal"
+          name="cli_correo"
+          label="Correo"
+          onChange={handleChange}
+          value={nuevoCliente && nuevoCliente.cli_correo}
+        />
+        <TextField
+          margin="normal"
+          name="cli_cel"
+          label="Celular"
+          onChange={handleChange}
+          value={nuevoCliente && nuevoCliente.cli_cel}
+        />
+
+       <br/>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#084720" }}
+          onClick={() => peticionPut()}
+        >
+          Actualizar
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#084720" }}
+          onClick={() => abrirCerrarModalEditar()}
+        >
+          Cancelar
+        </Button>
+      </Box>
+    </div>
+  );
   
   return (
     <>
@@ -416,6 +493,7 @@ const ClientesEmpresa = () => {
                     <TableCell sx={{ color: "#fff" }}>Cliente</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Celular</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
                   
                   </TableRow>
                 </TableHead>
@@ -426,7 +504,13 @@ const ClientesEmpresa = () => {
                       <TableCell>{consola.cli_nomcom}</TableCell>
                       <TableCell>{consola.cli_cel}</TableCell>
                       <TableCell>{consola.tip_nom}</TableCell>
-                      
+                      <TableCell>
+                        <EditIcon
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => seleccionarUsuario(consola, "Editar")}
+                        />
+                        
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -438,7 +522,12 @@ const ClientesEmpresa = () => {
             >
               {bodyInsertar}
             </Modal>
-            
+            <Modal
+              open={modalEditar}
+              onClose={() => abrirCerrarModalEditar()}
+            >
+              {bodyEditar}
+            </Modal>
           </Box>
         </Grid>
       </Grid>

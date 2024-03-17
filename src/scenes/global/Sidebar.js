@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box ,Tooltip } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import BusinessIcon from '@mui/icons-material/Business';
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -17,72 +16,46 @@ import "./styles.css";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   return (
+    <Tooltip title={title} placement="right">
+       
     <MenuItem
       component={<Link to={to} />}
       active={selected === title}
-      style={{}}
+      style={{
+        backgroundColor: selected === title ? 'transparent' : 'inherit',
+        color:selected === title ? 'rgb(45, 196, 45)': 'inherit',
+      }}
       onClick={() => setSelected(title)}
-      icon={icon}
+   
     >
-      <Typography>{title}</Typography>
+       {icon}
+        <div
+          style={{
+            width: selected === title ? '10%' : 0,
+            backgroundColor: 'rgb(45, 196, 45)',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 1,
+            transition: 'width 0.3s ease',
+          }}
+        ></div>
     </MenuItem>
+    </Tooltip>
   );
 };
 
-const SidebarCostum = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+const SidebarCostum = ({selectedItem}) => {
+  const [selected, setSelected] = useState(selectedItem);
 
   return (
     <Box
       className="backsidebar"
-      sx={{
-        "& .pro-sidebar-inner": {
-          background: `#2b5865 !important`,
-        },
-        "& .pro-icon-wrapper": {
-          backgroundColor: "transparent !important",
-        },
-        "& .pro-inner-item": {
-          padding: "5px 35px 5px 20px !important",
-        },
-        "& .pro-inner-item:hover": {
-          color: "#2b5865 !important",
-        },
-        "& .pro-menu-item.active": {
-          color: "#2b5865 !important",
-        },
-      }}
     >
-      <Sidebar collapsed={isCollapsed}>
+      <Sidebar collapsed={true}>
         <Menu iconShape="square">
-          {/* LOGO AND MENU ICON */}
-          <MenuItem
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
-            style={{
-              margin: "10px 0 20px 0",
-            }}
-          >
-            {!isCollapsed && (
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                ml="15px"
-              >
-                <Typography variant="h5">Supervisor</Typography>
-                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-                  <MenuOutlinedIcon />
-                </IconButton>
-                
-              </Box>
-            )}
-          </MenuItem>
-
-         
-
-          <Box paddingLeft={isCollapsed ? undefined : "10%"}>
+          <Box sx={{height: "100vh"}}>
             <Item
               title="Inicio"
               to="/dashboard"
@@ -121,7 +94,7 @@ const SidebarCostum = () => {
               setSelected={setSelected}
             />
             <Item
-              title="Registro de Clientes"
+              title="Clientes"
               to="/registroclientes"
               icon={<Groups3Icon />}
               selected={selected}
@@ -135,7 +108,7 @@ const SidebarCostum = () => {
               setSelected={setSelected}
             />
             <Item
-              title={<span style={{ fontSize: 'smaller' }}>Exportacion de Visitas</span>}
+              title="Exportacion de Visitas"
               to="/registrovisitas"
               icon={<HelpOutlineOutlinedIcon />}
               selected={selected}
@@ -144,7 +117,7 @@ const SidebarCostum = () => {
 
             
             <Item
-               title={<span style={{ fontSize: 'smaller' }}>Reportes de Visitas</span>}
+               title="Reportes de Visitas"
               to="/reportes"
               icon={<PieChartOutlineOutlinedIcon />}
               selected={selected}

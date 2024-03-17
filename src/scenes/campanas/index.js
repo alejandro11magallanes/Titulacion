@@ -475,9 +475,9 @@ const [minDate, setMinDate] = useState('');
    <TopBarSupervisor/>
     <Grid container>
       <Grid>
-      <SidebarCostum />
+      <SidebarCostum selectedItem="Campañas"/>
       </Grid>
-      <Grid sx={{ width: "75%" }}>
+      <Grid sx={{ width: "90%" }}>
       <Box m="20px" sx={{ width: "100%" }}>
         <Box sx={{ display: "flex" }}>
           <Typography variant="h3">Campañas</Typography>
@@ -504,7 +504,7 @@ const [minDate, setMinDate] = useState('');
           </FormControl>
           <Button
             variant="contained"
-            sx={{ backgroundColor: "#084720" }}
+            sx={{ backgroundColor: "#084720", marginLeft: "20px" }}
             onClick={() => peticionGet()}
           >
             Buscar

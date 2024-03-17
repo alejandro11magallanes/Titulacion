@@ -590,9 +590,9 @@ const Empresas = () => {
       <TopBarSupervisor />
       <Grid container>
         <Grid>
-          <SidebarCostum />
+          <SidebarCostum selectedItem="Empresas"/>
         </Grid>
-        <Grid sx={{ width: "75%" }}>
+        <Grid sx={{ width: "90%" }}>
           <Box m="20px" sx={{ width: "100%" }}>
             <Box sx={{ display: "flex" }}>
               <Typography variant="h3">Empresas</Typography>

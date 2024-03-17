@@ -18,7 +18,6 @@ import EmpresaIndividual from './scenesEmpresa/EmpresarioEmpresa';
 import SucuralesEmpresa from './scenesEmpresa/SucuralesEmpresa';
 import TiposDeClienteEmpresa from './scenesEmpresa/TipoDeClientesEmpresa';
 import ClientesEmpresa from './scenesEmpresa/ClientesEmpresa';
-import ReportesEmpresa from './scenesEmpresa/ReportesEmpresa';
 import CampanaEmpresa from './scenesEmpresa/CampanasEmpresa';
 function App() {
   
@@ -49,7 +48,6 @@ function App() {
       <Route path='/tusclientes' element={isLogged ? <ClientesEmpresa /> : <Navigate to="/" />} />
       <Route path='/tustiposdecliente' element={isLogged ? <TiposDeClienteEmpresa /> : <Navigate to="/" />} />
       <Route path='/tuscampanas' element={isLogged ? <CampanaEmpresa /> : <Navigate to="/" />} />
-      <Route path='/tusreportes' element={isLogged ? <ReportesEmpresa /> : <Navigate to="/" />} />
     </Routes> 
  
     </div>

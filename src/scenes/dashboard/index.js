@@ -17,12 +17,12 @@ const Dashboard = () => {
         <TopBarSupervisor />
         <Grid container>
           <Grid item >
-            <SidebarCostum />
+            <SidebarCostum selectedItem="Inicio"/>
           </Grid>
 
           <Grid item >
-            <Box m="20px">
-              
+            <Box m="100px">
+              <Typography variant="h4">Bienvenido Supervisor De LinkNow</Typography>
             </Box>
           </Grid>
         </Grid>

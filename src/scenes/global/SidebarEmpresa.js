@@ -110,15 +110,6 @@ const SidebarCostumEmpresa = ({selectedItem}) => {
               selected={selected}
               setSelected={setSelected}
             />
-           
-            
-            <Item
-              title="Reportes"
-              to="/tusreportes"
-              icon={<DescriptionIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
           </Box>
         </Menu>
       </Sidebar>
