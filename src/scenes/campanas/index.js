@@ -23,14 +23,16 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import apiUrl from "../../apiConfig";
 //url de las apis
 
-const baseUrlPost = "http://localhost:5656/agregarCampana";
-const baseUrlPut = "http://localhost:5656/editarCampana/";
-const baseUrlDelete = "http://localhost:5656/eliminarCampana/";
-const baseUrlEmpresasSelect = "http://localhost:5656/selectEmpresa";
-const baseUrlTipoSelect = "http://localhost:5656/selectTipoCli";
-const baseUrlBuscarEmpresa = "http://localhost:5656/EmpCam";
+const baseUrlPost = `${apiUrl}/agregarCampana`;
+const baseUrlPut = `${apiUrl}/editarCampana/`;
+const baseUrlDelete = `${apiUrl}/eliminarCampana/`;
+const baseUrlEmpresasSelect = `${apiUrl}/selectEmpresa`;
+const baseUrlTipoSelect = `${apiUrl}/selectTipoCli`;
+const baseUrlBuscarEmpresa = `${apiUrl}/EmpCam`;
+const urlImagenCampana = `${apiUrl}/traerImgCam`;
 
 const Campanas = () => {
   //declaraciones de useState
@@ -40,7 +42,9 @@ const Campanas = () => {
   const [dataTipoCli, setDataTipoCli] = useState([]);
   const [modalInsertar, setModalInsertar] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
+  const [imgCampana, setImgCampana] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [imagenBlob, setImagenBlob] = useState(null);
   const [modalEliminar, setModalEliminar] = useState(false);
   //seteo de entidad
   const [nuevaCampana, setnuevaCampana] = useState({
@@ -48,6 +52,10 @@ const Campanas = () => {
     tip_clave: "",
     cam_nom: "",
     cam_desc: "",
+    cam_lanza: "",
+    cam_mensaje: "",
+    cam_imagen: null,
+    cam_estatus: 1,
   });
   const [selectedEmpresa, setSelectedEmpresa] = useState({
     empresa: "",
@@ -72,6 +80,23 @@ const [minDate, setMinDate] = useState('');
   useEffect(() => {
     setMinSelectableDate();
   }, []);
+
+  const Logotipo = async (emp_clave) => {
+    const token = localStorage.getItem("token");
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      responseType: "blob",
+    };
+    await axios
+      .post(urlImagenCampana, { campana: emp_clave }, config)
+      .then((response) => {
+        setImagenBlob(response.data);
+      });
+  };
+
 
   //construccion de entidad
   const handleChange = (e) => {
@@ -139,9 +164,28 @@ const [minDate, setMinDate] = useState('');
         Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
       },
     };
-    await axios.post(baseUrlPost, nuevaCampana, config).then((response) => {
+    const formData = new FormData();
+    formData.append("tip_clave", nuevaCampana.tip_clave);
+    formData.append("cam_nom", nuevaCampana.cam_nom);
+    formData.append("cam_desc", nuevaCampana.cam_desc);
+    formData.append("cam_lanza", nuevaCampana.cam_lanza);
+    formData.append("cam_mensaje", nuevaCampana.cam_mensaje);
+    formData.append("emp_clave", nuevaCampana.emp_clave);
+    formData.append("cam_estatus", nuevaCampana.cam_estatus);
+    formData.append("cam_imagen", imgCampana);
+    await axios.post(baseUrlPost, formData, config).then((response) => {
       setData(data.concat(response.data.result));
       abrirCerrarModalInsertar();
+      setnuevaCampana({
+        emp_clave: "",
+        tip_clave: "",
+        cam_nom: "",
+        cam_desc: "",
+        cam_lanza: "",
+        cam_mensaje: "",
+        cam_imagen: null,
+        cam_estatus: 1,
+      })
     });
   };
 
@@ -152,19 +196,40 @@ const [minDate, setMinDate] = useState('');
         Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
       },
     };
+    const formData = new FormData();
+    formData.append("cam_desc", nuevaCampana.cam_desc);
+    formData.append("cam_lanza", nuevaCampana.cam_lanza);
+    formData.append("cam_mensaje", nuevaCampana.cam_mensaje);
+    formData.append("cam_nom", nuevaCampana.cam_nom);
+    formData.append("cam_estatus", nuevaCampana.cam_estatus);
+    if (imgCampana) {
+      formData.append("cam_imagen", imgCampana);
+    } 
     await axios
-      .put(baseUrlPut + nuevaCampana.cam_clave, nuevaCampana, config)
+      .put(baseUrlPut + nuevaCampana.cam_clave, formData, config)
       .then((response) => {
         var dataNueva = data;
         dataNueva.map((consola) => {
           if (nuevaCampana.cam_clave === consola.cam_clave) {
             consola.cam_nom = nuevaCampana.cam_nom;
-            consola.tip_clave = nuevaCampana.tip_clave;
             consola.cam_desc = nuevaCampana.cam_desc;
+            consola.cam_mensaje = nuevaCampana.cam_mensaje;
+            consola.cam_estatus = nuevaCampana.cam_estatus;
+            consola.cam_lanza = nuevaCampana.cam_lanza;
           }
         });
         setData(dataNueva);
         abrirCerrarModalEditar();
+        setnuevaCampana({
+          emp_clave: "",
+          tip_clave: "",
+          cam_nom: "",
+          cam_desc: "",
+          cam_lanza: "",
+          cam_mensaje: "",
+          cam_imagen: null,
+          cam_estatus: 1,
+        })
       });
   };
 
@@ -186,9 +251,10 @@ const [minDate, setMinDate] = useState('');
   };
   //cierro peticiones a la api
   //efectos de modal
-  const seleccionarUsuario = (usuario, caso) => {
+  const seleccionarUsuario = async (usuario, caso) => {
     setnuevaCampana(usuario);
-    caso === "Editar" ? abrirCerrarModalEditar() : abrirCerrarModalEliminar();
+    caso === "Editar" && setModalEditar(true);
+    await Logotipo(usuario.cam_clave);
   };
 
   useEffect(() => {
@@ -207,6 +273,7 @@ const [minDate, setMinDate] = useState('');
 
   const abrirCerrarModalEditar = () => {
     setModalEditar(!modalEditar);
+    setPreviewImage(null);
   };
 
   const abrirCerrarModalEliminar = () => {
@@ -216,7 +283,7 @@ const [minDate, setMinDate] = useState('');
   //construccion de modal
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
-
+    setImgCampana(selectedFile);
     if (selectedFile) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -242,6 +309,22 @@ const [minDate, setMinDate] = useState('');
     >
       <Grid container>
         <Grid item xs={6} md={8}>
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select">Empresa</InputLabel>
+          <Select
+            labelId="demo-simple-select"
+            id="demo-simple-select"
+            name="emp_clave"
+            onChange={handleChange}
+            label="Empresa"
+          >
+            {dataEmpresas.map((empresa) => (
+              <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
+                {empresa.emp_nomcom}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
           <TextField
             sx={{ width: "100%" }}
             margin="normal"
@@ -257,22 +340,6 @@ const [minDate, setMinDate] = useState('');
             label="Descripcion"
             onChange={handleChange}
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="demo-simple-select">Empresa</InputLabel>
-            <Select
-              labelId="demo-simple-select"
-              id="demo-simple-select"
-              name="emp_clave"
-              onChange={handleChange}
-              label="Empresa"
-            >
-              {dataEmpresas.map((empresa) => (
-                <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
-                  {empresa.emp_nomcom}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <Box sx={{ margin: "auto", display: "flex" }}>
             <Typography>Fecha de Creacion: {currentDate}</Typography>
             <Typography sx={{ marginLeft: "23%" }}>
@@ -283,14 +350,17 @@ const [minDate, setMinDate] = useState('');
               type="date"
               id="fecha"
               min={minDate}
-              name="fin"
+              onChange={handleChange}
+              name="cam_lanza"
             />
           </Box>
           <TextField
             margin="normal"
             fullWidth
             id="outlined-multiline-static"
-            label="Multiline"
+            label="Mensaje"
+            name="cam_mensaje"
+            onChange={handleChange}
             multiline
             rows={3}
           />
@@ -311,8 +381,11 @@ const [minDate, setMinDate] = useState('');
             </Select>
           </FormControl>
           <Typography>Selecciona una imagen para tu campaña </Typography>
-          <span>*Se recomienda que la imagen no supere estas medidas (1920 x 1080)</span>
-          <br/><br/>
+          <span>
+            *Se recomienda que la imagen no supere estas medidas (1920 x 1080)
+          </span>
+          <br />
+          <br />
           <input
             style={{ margin: "auto" }}
             type="file"
@@ -320,7 +393,7 @@ const [minDate, setMinDate] = useState('');
             accept="image/png"
             onChange={handleImageChange}
           />
-          <Box sx={{display: "flex", marginTop: "10px"}}>
+          <Box sx={{ display: "flex", marginTop: "10px" }}>
             <Button
               variant="contained"
               sx={{ backgroundColor: "#084720", margin: "auto" }}
@@ -330,7 +403,7 @@ const [minDate, setMinDate] = useState('');
             </Button>
             <Button
               variant="contained"
-              sx={{ backgroundColor: "#084720" ,margin: "auto"}}
+              sx={{ backgroundColor: "#084720", margin: "auto" }}
               onClick={() => abrirCerrarModalInsertar()}
             >
               Cancelar
@@ -359,7 +432,7 @@ const [minDate, setMinDate] = useState('');
     <div
       style={{
         position: "absolute",
-        width: 500,
+        width: 700,
         backgroundColor: "white",
         border: "2px solid #ccc",
         boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)", // Puedes ajustar la sombra según tus preferencias
@@ -388,27 +461,81 @@ const [minDate, setMinDate] = useState('');
           margin="normal"
           name="cam_desc"
           label="Descripcion"
+          fullWidth
           onChange={handleChange}
           value={nuevaCampana && nuevaCampana.cam_desc}
         />
-        <br />
         <FormControl fullWidth>
-          <InputLabel id="demo-simple-select-dos">Tipo de Cliente</InputLabel>
+          <InputLabel id="demo-simple-select-label">
+            Estatus de Campaña
+          </InputLabel>
           <Select
-            labelId="demo-simple-select-dos"
-            id="demo-simple-select-dos"
-            name="tip_clave"
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            name="cam_estatus"
             onChange={handleChange}
-            label="Tipo de Cliente"
+            label="Estatus de Campaña"
           >
-            {dataTipoCli.map((tipo) => (
-              <MenuItem key={tipo.tip_clave} value={tipo.tip_clave}>
-                {tipo.tip_nom}
-              </MenuItem>
-            ))}
+            <MenuItem value={1}>Activa</MenuItem>
+            <MenuItem value={0}>Desactivada</MenuItem>
           </Select>
         </FormControl>
-        <br />
+        
+      </Box>
+      <Box sx={{display: "flex"}}>
+      <Typography>Lanzamiento: {nuevaCampana.cam_lanza}</Typography>
+        <Typography sx={{marginLeft: "40%"}}>Estatus: {nuevaCampana.cam_estatus === 1 ? "Activa" : "Desactivada"}</Typography>
+      </Box>
+      <TextField
+        margin="normal"
+        name="cam_mensaje"
+        label="Mensaje"
+        fullWidth
+        onChange={handleChange}
+        value={nuevaCampana && nuevaCampana.cam_mensaje}
+      />
+      <br />
+
+      <Typography>¿Deseas modificar la fecha de Lanzamiento?</Typography>
+      <input
+        style={{ marginLeft: "10px" }}
+        type="date"
+        id="fecha"
+        min={minDate}
+        onChange={handleChange}
+        name="cam_lanza"
+      />
+      <br />
+      <br />
+      <Grid container>
+        <Grid md={6}>
+          <Typography>Actualmente tu logo de campaña es este:</Typography>
+          {imagenBlob && (
+            <img
+              src={URL.createObjectURL(imagenBlob)}
+              style={{ maxHeight: "200px", marginLeft: "50px" }}
+              alt="Logotipo de la empresa"
+            />
+          )}
+        </Grid>
+        <Grid md={6} sx={{ alignItems: "center" }}>
+          <Typography>Si deseas cambiar la imagen sube una</Typography>
+          <input type="file" accept="image/png" onChange={handleImageChange} />
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{
+                marginTop: "40px",
+                maxWidth: "100px",
+                maxHeight: "300px",
+                marginLeft: "100px",
+              }}
+            />
+          )}
+        </Grid>
+      </Grid>
+      <Box sx={{ display: "flex", marginLeft: "30%" }}>
         <Button
           variant="contained"
           sx={{ backgroundColor: "#084720" }}
@@ -418,7 +545,7 @@ const [minDate, setMinDate] = useState('');
         </Button>
         <Button
           variant="contained"
-          sx={{ backgroundColor: "#084720" }}
+          sx={{ backgroundColor: "#084720", marginLeft: "40px" }}
           onClick={() => abrirCerrarModalEditar()}
         >
           Cancelar
@@ -469,6 +596,22 @@ const [minDate, setMinDate] = useState('');
       </Box>
     </div>
   );
+
+  
+  const puedeEditar = (fechaLanzamiento) => {
+    // Convertir la fecha de lanzamiento a un objeto Date
+    const lanzamiento = new Date(fechaLanzamiento);
+
+    // Obtener la fecha actual
+    const currentDate = new Date();
+
+    // Calcular dos días después de la fecha de lanzamiento
+    const dosDiasDespues = new Date(lanzamiento);
+    dosDiasDespues.setDate(lanzamiento.getDate() + 2);
+
+    // Comparar las fechas y determinar si se puede editar
+    return currentDate < dosDiasDespues;
+  };
   //cierro construccion de modal
   return (
     <>
@@ -516,31 +659,36 @@ const [minDate, setMinDate] = useState('');
           <Table sx={{ border: "2px solid #ccc" }}>
             <TableHead sx={{ backgroundColor: "#084720" }}>
               <TableRow>
-                <TableCell sx={{ color: "#fff" }}>Clave</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Nombre</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Lanzamiento</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
-                <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
+              <TableCell sx={{ color: "#fff", width: "30px" }}>
+                      Clave
+                    </TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Nombre</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Lanzamiento</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Estatus</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.map((consola) => (
-                <TableRow key={consola.cam_clave}>
-                  <TableCell>{consola.cam_clave}</TableCell>
-                  <TableCell>{consola.cam_nom}</TableCell>
+                 <TableRow key={consola.cam_clave}>
+                 <TableCell>{consola.cam_clave}</TableCell>
+                 <TableCell>{consola.cam_nom}</TableCell>
 
-                  <TableCell>{consola.cam_lanza}</TableCell>
-                  <TableCell>{consola.tip_nom}</TableCell>
+                 <TableCell>{consola.cam_lanza}</TableCell>
+                 <TableCell>{consola.tip_nom}</TableCell>
+                 <TableCell>
+                   {consola.cam_estatus === 1 ? "Activa" : "Desactivada"}
+                 </TableCell>
                   <TableCell>
-                    <EditIcon
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => seleccionarUsuario(consola, "Editar")}
-                    />
-                    &nbsp;
-                    <DeleteIcon
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => seleccionarUsuario(consola, "Eliminar")}
-                    />
+                  {puedeEditar(consola.cam_lanza) && (
+                          <EditIcon
+                            sx={{ cursor: "pointer" }}
+                            onClick={() =>
+                              seleccionarUsuario(consola, "Editar")
+                            }
+                          />
+                        )}
                   </TableCell>
                 </TableRow>
               ))}

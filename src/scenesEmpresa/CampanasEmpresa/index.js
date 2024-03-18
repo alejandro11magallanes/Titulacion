@@ -54,7 +54,7 @@ const CampanaEmpresa = () => {
     cam_lanza: "",
     cam_mensaje: "",
     cam_imagen: null,
-    cam_estatus: true,
+    cam_estatus: 1,
   });
   const [selectedEmpresa, setSelectedEmpresa] = useState({
     empresa: empresaUsuario,
@@ -149,7 +149,7 @@ const CampanaEmpresa = () => {
     formData.append("cam_lanza", nuevaCampana.cam_lanza);
     formData.append("cam_mensaje", nuevaCampana.cam_mensaje);
     formData.append("emp_clave", nuevaCampana.emp_clave);
-    formData.append("cam_estatus", nuevaCampana.cam_estatus);
+    formData.append("cam_estatus", 1);
     formData.append("cam_imagen", imgCampana);
     await axios.post(baseUrlPost, formData, config).then((response) => {
       setData(data.concat(response.data.result));
@@ -163,7 +163,7 @@ const CampanaEmpresa = () => {
       cam_lanza: "",
       cam_mensaje: "",
       cam_imagen: null,
-      cam_estatus: true,
+      cam_estatus: 1,
     });
   };
 
@@ -174,20 +174,37 @@ const CampanaEmpresa = () => {
         Authorization: `Bearer ${token}`, // Agregar el token al encabezado de autorización
       },
     };
-    await axios
-      .put(baseUrlPut + nuevaCampana.cam_clave, nuevaCampana, config)
+    const formData = new FormData();
+    formData.append("cam_desc", nuevaCampana.cam_desc);
+    formData.append("cam_lanza", nuevaCampana.cam_lanza);
+    formData.append("cam_mensaje", nuevaCampana.cam_mensaje);
+    formData.append("cam_nom", nuevaCampana.cam_nom);
+    formData.append("cam_estatus", nuevaCampana.cam_estatus);
+    if (imgCampana) {
+      formData.append("cam_imagen", imgCampana);
+    } 
+    try{
+      await axios
+      .put(baseUrlPut + nuevaCampana.cam_clave, formData, config)
       .then((response) => {
         var dataNueva = data;
         dataNueva.map((consola) => {
           if (nuevaCampana.cam_clave === consola.cam_clave) {
             consola.cam_nom = nuevaCampana.cam_nom;
-            consola.tip_clave = nuevaCampana.tip_clave;
             consola.cam_desc = nuevaCampana.cam_desc;
+            consola.cam_mensaje = nuevaCampana.cam_mensaje;
+            consola.cam_estatus = nuevaCampana.cam_estatus;
+            consola.cam_lanza = nuevaCampana.cam_lanza;
           }
         });
         setData(dataNueva);
         abrirCerrarModalEditar();
       });
+    }
+    catch(error){
+      console.log(error);
+    }
+    
   };
 
   const peticionDelete = async () => {
@@ -406,8 +423,47 @@ const CampanaEmpresa = () => {
           onChange={handleChange}
           value={nuevaCampana && nuevaCampana.cam_desc}
         />
-        <Typography>Lanzamiento: {nuevaCampana.cam_lanza}</Typography>
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label">
+            Estatus de Campaña
+          </InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            name="cam_estatus"
+            onChange={handleChange}
+            label="Estatus de Campaña"
+          >
+            <MenuItem value={1}>Activa</MenuItem>
+            <MenuItem value={0}>Desactivada</MenuItem>
+          </Select>
+        </FormControl>
+        
       </Box>
+      <Box sx={{display: "flex"}}>
+      <Typography>Lanzamiento: {nuevaCampana.cam_lanza}</Typography>
+        <Typography sx={{marginLeft: "40%"}}>Estatus: {nuevaCampana.cam_estatus === 1 ? "Activa" : "Desactivada"}</Typography>
+      </Box>
+      <TextField
+        margin="normal"
+        name="cam_mensaje"
+        label="Mensaje"
+        fullWidth
+        onChange={handleChange}
+        value={nuevaCampana && nuevaCampana.cam_mensaje}
+      />
+      <br />
+
+      <Typography>¿Deseas modificar la fecha de Lanzamiento?</Typography>
+      <input
+        style={{ marginLeft: "10px" }}
+        type="date"
+        id="fecha"
+        min={minDate}
+        onChange={handleChange}
+        name="cam_lanza"
+      />
+      <br />
       <br />
       <Grid container>
         <Grid md={6}>
@@ -420,26 +476,39 @@ const CampanaEmpresa = () => {
             />
           )}
         </Grid>
-        <Grid md={6}>
-        <Typography>¿Deseas Modificarlo?</Typography>
-        
+        <Grid md={6} sx={{ alignItems: "center" }}>
+          <Typography>Si deseas cambiar la imagen sube una</Typography>
+          <input type="file" accept="image/png" onChange={handleImageChange} />
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{
+                marginTop: "40px",
+                maxWidth: "100px",
+                maxHeight: "300px",
+                marginLeft: "100px",
+              }}
+            />
+          )}
         </Grid>
       </Grid>
-
-      <Button
-        variant="contained"
-        sx={{ backgroundColor: "#084720" }}
-        onClick={() => peticionPut()}
-      >
-        Editar
-      </Button>
-      <Button
-        variant="contained"
-        sx={{ backgroundColor: "#084720" }}
-        onClick={() => abrirCerrarModalEditar()}
-      >
-        Cancelar
-      </Button>
+      <Box sx={{ display: "flex", marginLeft: "30%" }}>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#084720" }}
+          onClick={() => peticionPut()}
+        >
+          Editar
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#084720", marginLeft: "40px" }}
+          onClick={() => abrirCerrarModalEditar()}
+        >
+          Cancelar
+        </Button>
+      </Box>
     </div>
   );
 
@@ -485,6 +554,21 @@ const CampanaEmpresa = () => {
       </Box>
     </div>
   );
+
+  const puedeEditar = (fechaLanzamiento) => {
+    // Convertir la fecha de lanzamiento a un objeto Date
+    const lanzamiento = new Date(fechaLanzamiento);
+
+    // Obtener la fecha actual
+    const currentDate = new Date();
+
+    // Calcular dos días después de la fecha de lanzamiento
+    const dosDiasDespues = new Date(lanzamiento);
+    dosDiasDespues.setDate(lanzamiento.getDate() + 2);
+
+    // Comparar las fechas y determinar si se puede editar
+    return currentDate < dosDiasDespues;
+  };
   return (
     <>
       <TopBar />
@@ -504,10 +588,13 @@ const CampanaEmpresa = () => {
               <Table sx={{ border: "2px solid #ccc" }}>
                 <TableHead sx={{ backgroundColor: "#084720" }}>
                   <TableRow>
-                    <TableCell sx={{ color: "#fff" }}>Clave</TableCell>
+                    <TableCell sx={{ color: "#fff", width: "30px" }}>
+                      Clave
+                    </TableCell>
                     <TableCell sx={{ color: "#fff" }}>Nombre</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Lanzamiento</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Tipo</TableCell>
+                    <TableCell sx={{ color: "#fff" }}>Estatus</TableCell>
                     <TableCell sx={{ color: "#fff" }}>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
@@ -520,10 +607,17 @@ const CampanaEmpresa = () => {
                       <TableCell>{consola.cam_lanza}</TableCell>
                       <TableCell>{consola.tip_nom}</TableCell>
                       <TableCell>
-                        <EditIcon
-                          sx={{ cursor: "pointer" }}
-                          onClick={() => seleccionarUsuario(consola, "Editar")}
-                        />
+                        {consola.cam_estatus === 1 ? "Activa" : "Desactivada"}
+                      </TableCell>
+                      <TableCell>
+                        {puedeEditar(consola.cam_lanza) && (
+                          <EditIcon
+                            sx={{ cursor: "pointer" }}
+                            onClick={() =>
+                              seleccionarUsuario(consola, "Editar")
+                            }
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

@@ -23,14 +23,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import TopBarSupervisor from "../global/TopBarSupervisor";
+import apiUrl from "../../apiConfig";
 
 //url de las apis
-const baseUrl = "http://localhost:5656/verTipoCli";
-const baseUrlPost = "http://localhost:5656/agregarTipoCli";
-const baseUrlPut = "http://localhost:5656/editarTipoCli/";
-const baseUrlDelete = "http://localhost:5656/eliminarTipoCli/";
-const baseUrlEmpresasSelect = "http://localhost:5656/selectEmpresa";
-const baseUrlBuscarEmpresa = "http://localhost:5656/EmpTipCli";
+const baseUrl = `${apiUrl}/verTipoCli`;
+const baseUrlPost = `${apiUrl}/agregarTipoCli`;
+const baseUrlPut = `${apiUrl}//editarTipoCli/`;
+const baseUrlDelete = `${apiUrl}/eliminarTipoCli/`;
+const baseUrlEmpresasSelect = `${apiUrl}/selectEmpresa`;
+const baseUrlBuscarEmpresa = `${apiUrl}/EmpTipCli`;
 
 const TipoClientes = () => {
   //declaraciones de useState
