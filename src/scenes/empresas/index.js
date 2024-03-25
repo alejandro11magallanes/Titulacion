@@ -522,7 +522,7 @@ const Empresas = () => {
           sx={{ backgroundColor: "#084720", marginLeft: "30%" }}
           onClick={() => peticionPut()}
         >
-          Editar
+          Guardar
         </Button>
         <Button
           variant="contained"
@@ -617,7 +617,7 @@ const Empresas = () => {
                       <TableCell>{consola.emp_clave}</TableCell>
                       <TableCell>{consola.emp_nomcom}</TableCell>
                       <TableCell>{consola.emp_conta1}</TableCell>
-                      <TableCell>{consola.emp_cel2}</TableCell>
+                      <TableCell>{consola.emp_cel1}</TableCell>
                       <TableCell>
                         <EditIcon
                           sx={{ cursor: "pointer" }}

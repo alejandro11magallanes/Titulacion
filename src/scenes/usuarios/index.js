@@ -67,6 +67,10 @@ const Usuarios = () => {
       ...prevState,
       [name]: value,
     }));
+    setnuevoUsuario((prevState)=>({
+      ...prevState,
+      emp_clave: value,
+    }))
     console.log(selectedEmpresa);
   };
   //Peticiones a la api
@@ -256,26 +260,10 @@ const Usuarios = () => {
             label="Tipo de Usuario"
           >
             <MenuItem value={2}>Empresario</MenuItem>
-            <MenuItem value={3}>Supervisor</MenuItem>
+            <MenuItem value={3}>Empleado</MenuItem>
           </Select>
         </FormControl>
-        <FormControl fullWidth>
-          <InputLabel id="demo-simple-select">Empresa</InputLabel>
-          <Select
-            labelId="demo-simple-select"
-            id="demo-simple-select"
-            name="emp_clave"
-            onChange={handleChange}
-            label="Empresa"
-          >
-            {dataEmpresas.map((empresa) => (
-              <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
-                {empresa.emp_nomcom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <br />
+      
         <Button
           variant="contained"
           sx={{ backgroundColor: "#084720" }}

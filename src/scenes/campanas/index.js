@@ -30,7 +30,7 @@ const baseUrlPost = `${apiUrl}/agregarCampana`;
 const baseUrlPut = `${apiUrl}/editarCampana/`;
 const baseUrlDelete = `${apiUrl}/eliminarCampana/`;
 const baseUrlEmpresasSelect = `${apiUrl}/selectEmpresa`;
-const baseUrlTipoSelect = `${apiUrl}/selectTipoCli`;
+const baseUrlTipoSelect = `${apiUrl}/selectXempct`;
 const baseUrlBuscarEmpresa = `${apiUrl}/EmpCam`;
 const urlImagenCampana = `${apiUrl}/traerImgCam`;
 
@@ -113,6 +113,10 @@ const [minDate, setMinDate] = useState('');
       ...prevState,
       [name]: value,
     }));
+    setnuevaCampana((prevState)=>({
+      ...prevState,
+      emp_clave: value,
+    }))
     console.log(selectedEmpresa);
   };
   //Peticiones a la api
@@ -137,7 +141,7 @@ const [minDate, setMinDate] = useState('');
         Authorization: `Bearer ${token}`,
       },
     };
-    await axios.get(baseUrlTipoSelect, config).then((response) => {
+    await axios.post(baseUrlTipoSelect,selectedEmpresa, config).then((response) => {
       setDataTipoCli(response.data.result);
     });
   };
@@ -260,14 +264,15 @@ const [minDate, setMinDate] = useState('');
   useEffect(() => {
     const fetchData = async () => {
       await peticionGetEmpresas();
-      await peticionGetTipoCli();
+     
     };
 
     fetchData();
   }, []);
 
-  const abrirCerrarModalInsertar = () => {
+  const abrirCerrarModalInsertar = async () => {
     setModalInsertar(!modalInsertar);
+    await peticionGetTipoCli();
     setPreviewImage(null);
   };
 
@@ -309,22 +314,7 @@ const [minDate, setMinDate] = useState('');
     >
       <Grid container>
         <Grid item xs={6} md={8}>
-        <FormControl fullWidth>
-          <InputLabel id="demo-simple-select">Empresa</InputLabel>
-          <Select
-            labelId="demo-simple-select"
-            id="demo-simple-select"
-            name="emp_clave"
-            onChange={handleChange}
-            label="Empresa"
-          >
-            {dataEmpresas.map((empresa) => (
-              <MenuItem key={empresa.emp_clave} value={empresa.emp_clave}>
-                {empresa.emp_nomcom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        
           <TextField
             sx={{ width: "100%" }}
             margin="normal"
@@ -541,7 +531,7 @@ const [minDate, setMinDate] = useState('');
           sx={{ backgroundColor: "#084720" }}
           onClick={() => peticionPut()}
         >
-          Editar
+          Guardar
         </Button>
         <Button
           variant="contained"

@@ -39,8 +39,8 @@ function MyScreen() {
   const RedirectToVisitasEmpleado = () => {
     navigate("/visitasEmpleado");
   };
-  const Logout = () => {
-    CerrarSesion()
+  const Logout = async () => {
+    await CerrarSesion()
     window.location.href = '/';
     
   };

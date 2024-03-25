@@ -64,8 +64,8 @@ const TopBar = () => {
   }, []);
 
 
-  const Logout = () => {
-    CerrarSesion();
+  const Logout = async() => {
+    await CerrarSesion();
     window.location.href = '/';
   
   };
