@@ -137,10 +137,11 @@ const Usuarios = () => {
         var dataNueva = data;
         dataNueva.map((consola) => {
           if (nuevaUsuario.usu_numctrl === consola.usu_numctrl) {
-            consola.usu_correo = nuevaUsuario.usu_nombre;
-            consola.usu_correoemp_razon = nuevaUsuario.usu_correo;
+            consola.usu_correo = nuevaUsuario.usu_correo;
+            consola.usu_nombre = nuevaUsuario.usu_nombre;
             consola.usu_contra = nuevaUsuario.usu_contra;
             consola.usu_tipo = nuevaUsuario.usu_tipo;
+            consola.usu_estatus = nuevaUsuario.usu_estatus;
           }
         });
         setData(dataNueva);
@@ -332,7 +333,6 @@ const Usuarios = () => {
             name="usu_tipo"
             onChange={handleChange}
             label="Tipo de Usuario"
-            value={nuevaUsuario && nuevaUsuario.usu_tipo}
           >
             <MenuItem value={2}>Empresa</MenuItem>
             <MenuItem value={3}>Empleado</MenuItem>
@@ -343,7 +343,7 @@ const Usuarios = () => {
           sx={{ backgroundColor: "#084720" }}
           onClick={() => peticionPut()}
         >
-          Editar
+          Guardar
         </Button>
         <Button
           variant="contained"

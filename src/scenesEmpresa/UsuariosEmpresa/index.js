@@ -326,7 +326,7 @@ const UsuariosEmpresa = () => {
           sx={{ backgroundColor: "#084720" }}
           onClick={() => peticionPut()}
         >
-          Editar
+          Guardar
         </Button>
         <Button
           variant="contained"

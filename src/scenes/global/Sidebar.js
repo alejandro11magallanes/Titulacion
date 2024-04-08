@@ -11,6 +11,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import GroupsIcon from '@mui/icons-material/Groups';
 import Groups3Icon from '@mui/icons-material/Groups3';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import "./styles.css";
 
 
@@ -120,6 +121,13 @@ const SidebarCostum = ({selectedItem}) => {
                title="Reportes de Visitas"
               to="/reportes"
               icon={<PieChartOutlineOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+               title="QRs"
+              to="/qrs"
+              icon={<QrCode2Icon />}
               selected={selected}
               setSelected={setSelected}
             />

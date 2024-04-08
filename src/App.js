@@ -19,6 +19,8 @@ import SucuralesEmpresa from './scenesEmpresa/SucuralesEmpresa';
 import TiposDeClienteEmpresa from './scenesEmpresa/TipoDeClientesEmpresa';
 import ClientesEmpresa from './scenesEmpresa/ClientesEmpresa';
 import CampanaEmpresa from './scenesEmpresa/CampanasEmpresa';
+import QRs from './scenes/qr';
+import QrCliente from './qrs/RegistroQR';
 function App() {
   
     const isLogged = localStorage.getItem("IsLogged") === "true";
@@ -33,6 +35,7 @@ function App() {
       <Route path='/empresas' element={isLogged ? <Empresas /> : <Navigate to="/" />} />
       <Route path='/usuarios' element={isLogged ? <Usuarios /> : <Navigate to="/" />}/>
       <Route path='/sucursales' element={isLogged ? <Sucursales /> : <Navigate to="/" />} />
+      <Route path='/qrs' element={isLogged ? <QRs /> : <Navigate to="/" />} />
       <Route path='/tipoclientes' element={isLogged ? <TipoClientes /> : <Navigate to="/" />}/>
       <Route path='/registroclientes' element={isLogged ? <Clientes /> : <Navigate to="/" />} />
       <Route path='/campanas' element={isLogged ? <Campanas /> : <Navigate to="/" />} />
@@ -48,6 +51,8 @@ function App() {
       <Route path='/tusclientes' element={isLogged ? <ClientesEmpresa /> : <Navigate to="/" />} />
       <Route path='/tustiposdecliente' element={isLogged ? <TiposDeClienteEmpresa /> : <Navigate to="/" />} />
       <Route path='/tuscampanas' element={isLogged ? <CampanaEmpresa /> : <Navigate to="/" />} />
+
+      <Route path='/LinkAgregarCliente/:params' element={<QrCliente/>}/>
     </Routes> 
  
     </div>

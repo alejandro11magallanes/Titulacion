@@ -6,7 +6,7 @@ import { Button, Typography, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoginImg from "../../images/login.png";
-import LoginLogo from "../../images/logolink.PNG";
+import LoginLogo from "../../images/nowlogo3.png";
 import apiUrl from "../../apiConfig";
 const Login = () => {
   //logica
@@ -127,6 +127,11 @@ const Login = () => {
               >
                 Aceptar
               </Button>
+              <br/>
+              <Typography>Contactanos</Typography>
+              <Typography>Correo: contacto@brixar.mx</Typography>
+              <Typography>Celular: 871 269 1209 y 871510 27 84</Typography>
+             
             </Box>
           </form>
         </div>
